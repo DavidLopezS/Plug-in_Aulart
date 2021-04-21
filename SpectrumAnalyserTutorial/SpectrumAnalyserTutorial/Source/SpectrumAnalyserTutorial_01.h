@@ -163,7 +163,7 @@ public:
 	{
 		fftOrder = 11,//The order designates the size of the FFT window, and the number of point corresponds to 2 to the power of the order, in this case 2^11 = 2024
 		fftSize = 1 << fftOrder,//To calculate the corresponding FFT size, we use the left bit shift operator which produces 2048 as binary number 100000000000.
-		scopeSize = 512//
+		scopeSize = 512//We also set the number of points in the visual representation of the spectrum as a scope size of 512.
 	};
 
 private:
