@@ -54,7 +54,26 @@ public:
     void getStateInformation (juce::MemoryBlock& destData) override;
     void setStateInformation (const void* data, int sizeInBytes) override;
 
+	void pushNextSampleIntoFifo(float sample) noexcept;
+
+	enum
+	{
+		fftOrder = 11,
+		fftSize = 1 << fftOrder,
+		scopeSize = 512
+	};
+
+	float fifo[fftSize];
+	float fftData[2 * fftSize];
+	int fifoIndex = 0;
+
+	float scopeData[scopeSize];
+
+	bool nextFFTBlockReady = false;
+
 private:
-    //==============================================================================
+    
+	//SpectrumAnalyzer spectrumAnalysis;
+
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Loudness_Checker_PluginAudioProcessor)
 };

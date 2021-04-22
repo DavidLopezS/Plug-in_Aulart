@@ -15,14 +15,14 @@
 //==============================================================================
 /*
 */
-class SpectrumAnalyzer  : public juce::AudioAppComponent, private juce::Timer
+class SpectrumAnalyzer  : public juce::Component, private juce::Timer
 {
 public:
     SpectrumAnalyzer();
     ~SpectrumAnalyzer() override;
 
 
-	void getNextAudioBlock(const juce::AudioSourceChannelInfo&) override;
+	//void getNextAudioBlock(const juce::AudioSourceChannelInfo&) override;
     void paint (juce::Graphics&) override;
     void resized() override;
 	void timerCallback() override;

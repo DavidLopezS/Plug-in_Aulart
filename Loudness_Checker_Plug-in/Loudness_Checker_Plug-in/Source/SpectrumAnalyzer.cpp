@@ -23,16 +23,16 @@ SpectrumAnalyzer::~SpectrumAnalyzer()
 {
 }
 
-void SpectrumAnalyzer::getNextAudioBlock(const juce::AudioSourceChannelInfo& bufferToBeFilled)
-{
-	if(bufferToBeFilled.buffer->getNumChannels() > 0)
-	{
-		auto* channelData = bufferToBeFilled.buffer->getReadPointer(0, bufferToBeFilled.startSample);
-
-		for (auto i = 0; i < bufferToBeFilled.numSamples; ++i)
-			pushNextSampleIntoFifo(channelData[i]);
-	}
-}
+//void SpectrumAnalyzer::getNextAudioBlock(const juce::AudioSourceChannelInfo& bufferToBeFilled)
+//{
+//	if(bufferToBeFilled.buffer->getNumChannels() > 0)
+//	{
+//		auto* channelData = bufferToBeFilled.buffer->getReadPointer(0, bufferToBeFilled.startSample);
+//
+//		for (auto i = 0; i < bufferToBeFilled.numSamples; ++i)
+//			pushNextSampleIntoFifo(channelData[i]);
+//	}
+//}
 
 void SpectrumAnalyzer::paint (juce::Graphics& g)
 {

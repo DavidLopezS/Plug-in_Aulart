@@ -150,17 +150,28 @@ void Loudness_Checker_PluginAudioProcessor::processBlock (juce::AudioBuffer<floa
     // the samples and the outer loop is handling the channels.
     // Alternatively, you can process the samples with the channels
     // interleaved by keeping the same state.
-    //for (int channel = 0; channel < totalNumInputChannels; ++channel)
-    //{
-    //    auto* channelData = buffer.getWritePointer (channel);
+    for (int channel = 0; channel < totalNumInputChannels; ++channel)
+    {
+        auto* channelData = buffer.getReadPointer (channel);
+		
+		for (int sample = 0; sample < buffer.getNumSamples(); ++sample)
+			pushNextSampleIntoFifo(channelData[sample]);
+    }
+}
 
-    //    // ..do something to the data...
-    //}
-
-	if(buffer.getNumChannels() > 0)
+void Loudness_Checker_PluginAudioProcessor::pushNextSampleIntoFifo(float sample) noexcept
+{
+	if (fifoIndex == fftSize)
 	{
-		auto* channelData = buffer.getReadPointer(0, buffer.getNumSamples()
+		if (!nextFFTBlockReady)
+		{
+			juce::zeromem(fftData, sizeof(fftData));
+			memcpy(fftData, fifo, sizeof(fifo));
+			nextFFTBlockReady = true;
+		}
+		fifoIndex = 0;
 	}
+	fifo[fifoIndex++] = sample;
 }
 
 //==============================================================================
