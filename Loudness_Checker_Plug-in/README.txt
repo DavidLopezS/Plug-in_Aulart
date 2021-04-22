@@ -1,2 +1,5 @@
-https://www.youtube.com/watch?v=Y5MhjRxfNvA&ab_channel=TheAudioProgrammer
-AudioBlock
+Restructurate the analyzer into class structure
+
+Check the scope and order of the fourier
+
+Add the non scopable spectrogram

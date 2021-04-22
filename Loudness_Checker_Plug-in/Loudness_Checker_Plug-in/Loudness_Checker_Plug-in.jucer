@@ -4,8 +4,18 @@
               useAppConfig="0" addUsingNamespaceToJuceHeader="0" displaySplashScreen="1"
               jucerFormatVersion="1">
   <MAINGROUP id="y0tGV0" name="Loudness_Checker_Plug-in">
-    <GROUP id="{67BDF05E-C662-2AA3-E505-CCE6A8C6ABFE}" name="Data"/>
-    <GROUP id="{8E07503C-2A85-90BC-527B-DC6EFA8901CC}" name="UI"/>
+    <GROUP id="{67BDF05E-C662-2AA3-E505-CCE6A8C6ABFE}" name="Data">
+      <FILE id="cMNyfB" name="SpectrumAnalyzerData.cpp" compile="1" resource="0"
+            file="Source/Data/SpectrumAnalyzerData.cpp"/>
+      <FILE id="mDyk2J" name="SpectrumAnalyzerData.h" compile="0" resource="0"
+            file="Source/Data/SpectrumAnalyzerData.h"/>
+    </GROUP>
+    <GROUP id="{8E07503C-2A85-90BC-527B-DC6EFA8901CC}" name="UI">
+      <FILE id="FnmPKT" name="SpectrumAnalyzerComponent.cpp" compile="1"
+            resource="0" file="Source/UI/SpectrumAnalyzerComponent.cpp"/>
+      <FILE id="r7Hwka" name="SpectrumAnalyzerComponent.h" compile="0" resource="0"
+            file="Source/UI/SpectrumAnalyzerComponent.h"/>
+    </GROUP>
     <GROUP id="{34161C91-BF2E-DEBC-8DD7-5D7245A3EA64}" name="Source">
       <FILE id="VyZ07G" name="SpectrumAnalyzer.cpp" compile="1" resource="0"
             file="Source/SpectrumAnalyzer.cpp"/>

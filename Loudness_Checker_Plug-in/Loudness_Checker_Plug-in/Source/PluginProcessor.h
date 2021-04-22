@@ -60,7 +60,7 @@ public:
 	{
 		fftOrder = 11,
 		fftSize = 1 << fftOrder,
-		scopeSize = 512
+		scopeSize = 2048
 	};
 
 	float fifo[fftSize];
