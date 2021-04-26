@@ -3,25 +3,35 @@
 
     SpectrumAnalyzerComponent.cpp
     Created: 22 Apr 2021 1:10:11pm
-    Author:  david
+    Author:  David López Saludes
 
   ==============================================================================
 */
 
 #include <JuceHeader.h>
 #include "SpectrumAnalyzerComponent.h"
-//#include "..\Data\SpectrumAnalyzerData.h"
 
 //==============================================================================
-SpectrumAnalyzerComponent::SpectrumAnalyzerComponent() : forwardFFT(dataAnalyzer.fftOrder), window(dataAnalyzer.fftSize, juce::dsp::WindowingFunction<float>::hann)
+SpectrumAnalyzerComponent::SpectrumAnalyzerComponent() : forwardFFT(fftOrder), window(fftSize, juce::dsp::WindowingFunction<float>::hann)
 {
-    // In your constructor, you should add any child components, and
-    // initialise any special settings that your component needs.
-
+	setOpaque(true);
+	startTimerHz(30);
 }
 
 SpectrumAnalyzerComponent::~SpectrumAnalyzerComponent()
 {
+	stopTimer();
+}
+
+void SpectrumAnalyzerComponent::processAudioBlock(const juce::AudioBuffer<float>& buffer)
+{
+	if(buffer.getNumChannels() > 0)
+	{
+		const float* channelData = buffer.getReadPointer(0);
+
+		for (int sample = 0; sample < buffer.getNumSamples(); ++sample)
+			pushNextSampleIntoFifo(channelData[sample]);
+	}
 }
 
 void SpectrumAnalyzerComponent::paint (juce::Graphics& g)
@@ -33,38 +43,46 @@ void SpectrumAnalyzerComponent::paint (juce::Graphics& g)
 	drawFrame(g);
 }
 
-void SpectrumAnalyzerComponent::resized()
-{
-    // This method is where you should set the bounds of any child
-    // components that your component contains..
-
-}
-
 void SpectrumAnalyzerComponent::timerCallback()
 {
-	if (dataAnalyzer.nextFFTBlockReady)
+	if (nextFFTBlockReady)
 	{
 		drawNextFrameOfSpectrum();
-		dataAnalyzer.nextFFTBlockReady = false;
+		nextFFTBlockReady = false;
 		repaint();
 	}
+}
+
+void SpectrumAnalyzerComponent::pushNextSampleIntoFifo(float sample) noexcept
+{
+	if (fifoIndex == fftSize)
+	{
+		if (!nextFFTBlockReady)
+		{
+			juce::zeromem(fftData, sizeof(fftData));
+			memcpy(fftData, fifo, sizeof(fifo));
+			nextFFTBlockReady = true;
+		}
+		fifoIndex = 0;
+	}
+	fifo[fifoIndex++] = sample;
 }
 
 void SpectrumAnalyzerComponent::drawNextFrameOfSpectrum()
 {
 
-	window.multiplyWithWindowingTable(dataAnalyzer.fftData, dataAnalyzer.fftSize);
+	window.multiplyWithWindowingTable(fftData, fftSize);
 
-	forwardFFT.performFrequencyOnlyForwardTransform(dataAnalyzer.fftData);
+	forwardFFT.performFrequencyOnlyForwardTransform(fftData);
 
 	auto mindB = -100.0f;
 	auto maxdB = 0.0f;
 
-	for (int i = 0; i < dataAnalyzer.scopeSize; ++i)
+	for (int i = 0; i < scopeSize; ++i)
 	{
-		auto skewedProportionX = 1.0f - std::exp(std::log(1.0f - (float)i / (float)dataAnalyzer.scopeSize) * 0.2f);
-		auto fftDataIndex = juce::jlimit(0, dataAnalyzer.fftSize / 2, (int)(skewedProportionX * (float)dataAnalyzer.fftSize * 0.5f));
-		auto level = juce::jmap(juce::jlimit(mindB, maxdB, juce::Decibels::gainToDecibels(dataAnalyzer.fftData[fftDataIndex]) - juce::Decibels::gainToDecibels((float)dataAnalyzer.fftSize)),
+		auto skewedProportionX = 1.0f - std::exp(std::log(1.0f - (float)i / (float)scopeSize) * 0.2f);
+		auto fftDataIndex = juce::jlimit(0, fftSize / 2, (int)(skewedProportionX * (float)fftSize * 0.5f));
+		auto level = juce::jmap(juce::jlimit(mindB, maxdB, juce::Decibels::gainToDecibels(fftData[fftDataIndex]) - juce::Decibels::gainToDecibels((float)fftSize)),
 			mindB, maxdB, 0.0f, 1.0f);
 
 		scopeData[i] = level;
@@ -74,14 +92,14 @@ void SpectrumAnalyzerComponent::drawNextFrameOfSpectrum()
 
 void SpectrumAnalyzerComponent::drawFrame(juce::Graphics& g)
 {
-	for (int i = 1; i < dataAnalyzer.scopeSize; ++i)
+	for (int i = 1; i < scopeSize; ++i)
 	{
 		auto width = getLocalBounds().getWidth();
 		auto height = getLocalBounds().getHeight();
 
-		g.drawLine({ (float)juce::jmap(i - 1, 0, dataAnalyzer.scopeSize - 1, 0, width),
+		g.drawLine({ (float)juce::jmap(i - 1, 0, scopeSize - 1, 0, width),
 						   juce::jmap(scopeData[i - 1], 0.0f, 1.0f, (float)height, 0.0f),
-					(float)juce::jmap(i, 0, dataAnalyzer.scopeSize - 1, 0, width),
+					(float)juce::jmap(i, 0, scopeSize - 1, 0, width),
 						   juce::jmap(scopeData[i], 0.0f, 1.0f, (float)height, 0.0f) });
 	}
 }

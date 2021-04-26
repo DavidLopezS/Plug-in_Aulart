@@ -11,6 +11,10 @@
             file="Source/Data/SpectrumAnalyzerData.h"/>
     </GROUP>
     <GROUP id="{8E07503C-2A85-90BC-527B-DC6EFA8901CC}" name="UI">
+      <FILE id="fKi0tI" name="SpectrogramRepresentation.cpp" compile="1"
+            resource="0" file="Source/UI/SpectrogramRepresentation.cpp"/>
+      <FILE id="sFIHHX" name="SpectrogramRepresentation.h" compile="0" resource="0"
+            file="Source/UI/SpectrogramRepresentation.h"/>
       <FILE id="FnmPKT" name="SpectrumAnalyzerComponent.cpp" compile="1"
             resource="0" file="Source/UI/SpectrumAnalyzerComponent.cpp"/>
       <FILE id="r7Hwka" name="SpectrumAnalyzerComponent.h" compile="0" resource="0"
