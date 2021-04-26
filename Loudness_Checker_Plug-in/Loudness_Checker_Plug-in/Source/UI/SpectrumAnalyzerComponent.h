@@ -32,7 +32,7 @@ public:
 	{
 		fftOrder = 11,
 		fftSize = 1 << fftOrder,
-		scopeSize = 2048 //512
+		scopeSize = 512 //2048
 	};
 
 private:

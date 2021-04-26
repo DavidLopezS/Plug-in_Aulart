@@ -3,7 +3,7 @@
 
     SpectrogramRepresentation.cpp
     Created: 26 Apr 2021 9:19:36am
-    Author:  david
+    Author:  David López Saludes
 
   ==============================================================================
 */

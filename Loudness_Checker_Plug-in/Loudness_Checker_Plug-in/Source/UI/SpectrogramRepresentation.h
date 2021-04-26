@@ -3,7 +3,7 @@
 
     SpectrogramRepresentation.h
     Created: 26 Apr 2021 9:19:36am
-    Author:  david
+    Author:  David López Saludes
 
   ==============================================================================
 */
@@ -39,8 +39,8 @@ private:
 	juce::Image spectrogramImage;
 
 	float fifo[fftSize];
-	float fftData[2 * fftSize];
 	int fifoIndex = 0;
+	float fftData[2 * fftSize];
 	bool nextFFTBlockReady = false;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (SpectrogramRepresentation)

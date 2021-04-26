@@ -38,12 +38,13 @@ void Loudness_Checker_PluginAudioProcessorEditor::resized()
 
 	const auto paddingX = 5;
 	const auto paddingY = 35;
-	const auto paddingY2 = 235;
+	const auto paddingY2 = 300;
 	const auto width = 300;
 	const auto height = 200;
 	
-	mySpectrRep.setBounds(paddingX, paddingY2, getWidth(), height);
 	mySpectrAnComp.setBounds(paddingX, paddingY, getWidth(), height);
+	mySpectrRep.setBounds(paddingX, paddingY2, getWidth(), height);
+
 
 }
 

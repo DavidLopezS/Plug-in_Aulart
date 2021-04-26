@@ -142,8 +142,8 @@ void Loudness_Checker_PluginAudioProcessor::processBlock (juce::AudioBuffer<floa
 	auto mySpectrData = dynamic_cast<Loudness_Checker_PluginAudioProcessorEditor*>(getActiveEditor());
 	if (mySpectrData != nullptr)
 	{
-		mySpectrData->mySpectrAnComp.processAudioBlock(buffer);
-		mySpectrData->mySpectrRep.processAudioBlock(buffer);
+		mySpectrData->mySpectrAnComp.processAudioBlock(buffer);//RMS buffer input
+		mySpectrData->mySpectrRep.processAudioBlock(buffer);//Spectrogram buffer input
 	}
 
 }
