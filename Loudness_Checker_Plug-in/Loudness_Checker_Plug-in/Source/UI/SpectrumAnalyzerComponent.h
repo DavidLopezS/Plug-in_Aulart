@@ -48,5 +48,9 @@ private:
 
 	float scopeData[scopeSize];
 
+	using SliderAttatchment = juce::AudioProcessorValueTreeState::SliderAttachment;
+
+
+
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (SpectrumAnalyzerComponent)
 };

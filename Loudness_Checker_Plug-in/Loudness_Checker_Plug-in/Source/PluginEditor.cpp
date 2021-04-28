@@ -29,7 +29,7 @@ Loudness_Checker_PluginAudioProcessorEditor::~Loudness_Checker_PluginAudioProces
 //==============================================================================
 void Loudness_Checker_PluginAudioProcessorEditor::paint (juce::Graphics& g)
 {
-	g.fillAll(juce::Colours::black);
+	g.fillAll(juce::Colours::white);
 
 }
 
@@ -44,6 +44,7 @@ void Loudness_Checker_PluginAudioProcessorEditor::resized()
 	
 	mySpectrAnComp.setBounds(paddingX, paddingY, getWidth(), height);
 	mySpectrRep.setBounds(paddingX, paddingY2, getWidth(), height);
+	//mySpectrRep.setBounds(0, 0, getWidth(), getHeight());
 
 
 }

@@ -3,7 +3,7 @@
 
     SpectrogramRepresentation.h
     Created: 26 Apr 2021 9:19:36am
-    Author:  David López Saludes
+    Author:  David LÃ³pez Saludes
 
   ==============================================================================
 */
@@ -29,7 +29,7 @@ public:
 
 	enum 
 	{
-		fftOrder = 10,
+		fftOrder = 11,//10
 		fftSize = 1 << fftOrder //adds the ordet 10 into the binary number, so 10 extra zeros (00010000000000 = 1024)
 	};
 

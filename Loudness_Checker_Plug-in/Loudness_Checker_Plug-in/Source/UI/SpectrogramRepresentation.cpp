@@ -3,7 +3,7 @@
 
     SpectrogramRepresentation.cpp
     Created: 26 Apr 2021 9:19:36am
-    Author:  David López Saludes
+    Author:  David LÃ³pez Saludes
 
   ==============================================================================
 */
@@ -12,7 +12,7 @@
 #include "SpectrogramRepresentation.h"
 
 //==============================================================================
-SpectrogramRepresentation::SpectrogramRepresentation() : forwardFFT(fftOrder), spectrogramImage(juce::Image::RGB, 400, 300, true)
+SpectrogramRepresentation::SpectrogramRepresentation() : forwardFFT(fftOrder), spectrogramImage(juce::Image::RGB, 512, 512, true)
 {
 	setOpaque(true);
 	startTimerHz(60);
@@ -81,15 +81,15 @@ void SpectrogramRepresentation::drawNextLineOfSpectrogram()
 
 	juce::Range<float> maxLevel = juce::FloatVectorOperations::findMinAndMax(fftData, fftSize / 2);
 	if (maxLevel.getEnd() == 0.0f)
-		maxLevel.setEnd(0.00001);
+		maxLevel.setEnd(0.1);//0.00001
 
 	for(int i = 1; i < imageHeight; ++i)
 	{
-		const float skewedProportionY = 1.0f - std::exp(std::log(i / (float)imageHeight) * 0.2f);
+		const float skewedProportionY = 1.0f - std::exp(std::log(i / (float)imageHeight) * 0.1f);//0.2f
 		const int fftDataIndex = juce::jlimit(0, fftSize / 2, (int)(skewedProportionY * fftSize / 2));
-		const float level = juce::jmap(fftData[fftDataIndex], 0.0f, maxLevel.getEnd(), 0.0f, 1.0f);
+		const float level = juce::jmap(fftData[fftDataIndex], 0.0f, maxLevel.getEnd(), 0.0f, 2.0f);//Original targetRangeMax = 1.0f, needs to be tweaked/tested
 
-		spectrogramImage.setPixelAt(rightHandEdge, i, juce::Colour::fromHSV(level, 1.0f, level, 1.0f));
+		spectrogramImage.setPixelAt(rightHandEdge, i, juce::Colour::fromHSL(level, 1.0f, level, 1.0f));//Colour::fromHSV
 	}
 
 }

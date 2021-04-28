@@ -19,7 +19,7 @@ Loudness_Checker_PluginAudioProcessor::Loudness_Checker_PluginAudioProcessor()
                       #endif
                        .withOutput ("Output", juce::AudioChannelSet::stereo(), true)
                      #endif
-                       )
+                       ), apvts(*this, nullptr, "Parameters", createParams())
 #endif
 {
 }
@@ -178,4 +178,19 @@ void Loudness_Checker_PluginAudioProcessor::setStateInformation (const void* dat
 juce::AudioProcessor* JUCE_CALLTYPE createPluginFilter()
 {
     return new Loudness_Checker_PluginAudioProcessor();
+}
+
+//Value Tree
+juce::AudioProcessorValueTreeState::ParameterLayout Loudness_Checker_PluginAudioProcessor::createParams()
+{
+	std::vector<std::unique_ptr<juce::RangedAudioParameter>> params;
+
+	//Max db Knob RMS
+	params.push_back(std::make_unique<juce::AudioParameterFloat>("MAXDBKNOBRMS", "Max db Knob RMS", juce::NormalisableRange<float>{0.0f, 100.0f, 0.1}, 0.0f));
+
+	//Min db Know RMS
+	params.push_back(std::make_unique<juce::AudioParameterFloat>("MINDBKNOWRMS", "Min db Knob RMS", juce::NormalisableRange<float>{-100.0f, 0.0f, 0.1}, 0.0f));
+
+	return{ params.begin(), params.end() };
+
 }
