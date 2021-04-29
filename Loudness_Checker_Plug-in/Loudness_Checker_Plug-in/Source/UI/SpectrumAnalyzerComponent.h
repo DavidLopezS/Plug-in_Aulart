@@ -23,6 +23,8 @@ public:
 
 	void processAudioBlock(const juce::AudioBuffer<float>&);
     void paint (juce::Graphics&) override;
+	void resized() override;
+	void mouseDown(const juce::MouseEvent&) override;
 	void pushNextSampleIntoFifo(float) noexcept;
 	void timerCallback() override;
 	void drawNextFrameOfSpectrum();
@@ -47,6 +49,8 @@ private:
 
 
 	float scopeData[scopeSize];
+
+	bool clicked = false;
 
 	using SliderAttatchment = juce::AudioProcessorValueTreeState::SliderAttachment;
 

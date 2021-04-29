@@ -41,6 +41,17 @@ void SpectrogramRepresentation::paint (juce::Graphics& g)
 	g.drawImage(spectrogramImage, getLocalBounds().toFloat());	
 }
 
+void SpectrogramRepresentation::resized()
+{
+
+}
+
+void SpectrogramRepresentation::mouseDown(const juce::MouseEvent& e)
+{
+	clicked = true;
+	repaint();
+}
+
 void SpectrogramRepresentation::timerCallback()
 {
 	if(nextFFTBlockReady)

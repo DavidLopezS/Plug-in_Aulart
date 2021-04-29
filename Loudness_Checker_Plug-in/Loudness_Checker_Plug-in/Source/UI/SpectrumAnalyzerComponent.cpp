@@ -43,6 +43,17 @@ void SpectrumAnalyzerComponent::paint (juce::Graphics& g)
 	drawFrame(g);
 }
 
+void SpectrumAnalyzerComponent::resized()
+{
+
+}
+
+void SpectrumAnalyzerComponent::mouseDown(const juce::MouseEvent& e)
+{
+	clicked = true;
+	repaint();
+}
+
 void SpectrumAnalyzerComponent::timerCallback()
 {
 	if (nextFFTBlockReady)

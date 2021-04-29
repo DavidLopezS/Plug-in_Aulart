@@ -146,6 +146,9 @@ void Loudness_Checker_PluginAudioProcessor::processBlock (juce::AudioBuffer<floa
 		mySpectrData->mySpectrRep.processAudioBlock(buffer);//Spectrogram buffer input
 	}
 
+	auto &maxRMSdB = *apvts.getRawParameterValue("MAXDBKNOBRMS");
+	auto &minRMSdB = *apvts.getRawParameterValue("MINDBKNOWRMS");
+
 }
 
 //==============================================================================

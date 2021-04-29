@@ -23,6 +23,8 @@ public:
 
 	void processAudioBlock(const juce::AudioBuffer<float>&);
     void paint (juce::Graphics&) override;
+	void resized() override;
+	void mouseDown(const juce::MouseEvent&) override;
 	void timerCallback() override;
 	void pushNextSampleIntoFifo(float) noexcept;
 	void drawNextLineOfSpectrogram();
@@ -42,6 +44,8 @@ private:
 	int fifoIndex = 0;
 	float fftData[2 * fftSize];
 	bool nextFFTBlockReady = false;
+
+	bool clicked = false;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (SpectrogramRepresentation)
 };
