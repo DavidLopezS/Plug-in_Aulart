@@ -86,7 +86,7 @@ void SpectrumAnalyzerComponent::drawNextFrameOfSpectrum()
 
 	forwardFFT.performFrequencyOnlyForwardTransform(fftData);
 
-	auto mindB = -100.0f;
+	auto mindB = mindBValue;//-100.0f
 	auto maxdB = 0.0f;
 
 	for (int i = 0; i < scopeSize; ++i)

@@ -146,9 +146,11 @@ void Loudness_Checker_PluginAudioProcessor::processBlock (juce::AudioBuffer<floa
 		mySpectrData->mySpectrRep.processAudioBlock(buffer);//Spectrogram buffer input
 	}
 
+	auto &graftOutputType = *apvts.getRawParameterValue("GRAFTYPE");
 	auto &maxRMSdB = *apvts.getRawParameterValue("MAXDBKNOBRMS");
 	auto &minRMSdB = *apvts.getRawParameterValue("MINDBKNOWRMS");
 
+	rmsAnalyzer.mindBValue = minRMSdB.load();
 }
 
 //==============================================================================
@@ -188,11 +190,13 @@ juce::AudioProcessorValueTreeState::ParameterLayout Loudness_Checker_PluginAudio
 {
 	std::vector<std::unique_ptr<juce::RangedAudioParameter>> params;
 
+	params.push_back(std::make_unique<juce::AudioParameterChoice>("GRAFTYPE", "Graf Type", juce::StringArray{ "RMS", "Spectrogram" }, 0));
+
 	//Max db Knob RMS
 	params.push_back(std::make_unique<juce::AudioParameterFloat>("MAXDBKNOBRMS", "Max db Knob RMS", juce::NormalisableRange<float>{0.0f, 100.0f, 0.1}, 0.0f));
 
 	//Min db Know RMS
-	params.push_back(std::make_unique<juce::AudioParameterFloat>("MINDBKNOWRMS", "Min db Knob RMS", juce::NormalisableRange<float>{-100.0f, 0.0f, 0.1}, 0.0f));
+	params.push_back(std::make_unique<juce::AudioParameterFloat>("MINDBKNOWRMS", "Min db Knob RMS", juce::NormalisableRange<float>{-100.0f, 0.0f, 0.1}, -100.0f));
 
 	return{ params.begin(), params.end() };
 

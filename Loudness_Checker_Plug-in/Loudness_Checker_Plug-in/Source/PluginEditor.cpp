@@ -16,6 +16,13 @@ Loudness_Checker_PluginAudioProcessorEditor::Loudness_Checker_PluginAudioProcess
 {
 	setOpaque(true);
 
+	mindBSlider.setSliderStyle(juce::Slider::SliderStyle::RotaryHorizontalVerticalDrag);
+	mindBSlider.setTextBoxStyle(juce::Slider::TextBoxBelow, true, 100, 50);
+	addAndMakeVisible(mindBSlider);
+
+	using Attachment = juce::AudioProcessorValueTreeState::SliderAttachment;
+	mindBSliderAttatchment = std::make_unique<Attachment>(audioProcessor.apvts, "MINDBKNOWRMS", mindBSlider);
+
 	addAndMakeVisible(&mySpectrAnComp);
 	addAndMakeVisible(&mySpectrRep);
 
@@ -29,23 +36,69 @@ Loudness_Checker_PluginAudioProcessorEditor::~Loudness_Checker_PluginAudioProces
 //==============================================================================
 void Loudness_Checker_PluginAudioProcessorEditor::paint (juce::Graphics& g)
 {
-	g.fillAll(juce::Colours::white);
+	g.fillAll(juce::Colours::darkgrey);
 
 }
 
 void Loudness_Checker_PluginAudioProcessorEditor::resized()
 {
 
-	const auto paddingX = 5;
-	const auto paddingY = 35;
-	const auto paddingY2 = 300;
-	const auto width = 300;
-	const auto height = 200;
+	//const auto paddingX = 5;
+	//const auto paddingY = 35;
+	//const auto paddingY2 = 300;
+	//const auto width = 300;
+	//const auto height = 200;
 	
-	mySpectrAnComp.setBounds(paddingX, paddingY, getWidth(), height);
-	mySpectrRep.setBounds(paddingX, paddingY2, getWidth(), height);
+	//mySpectrAnComp.setBounds(paddingX, paddingY, getWidth(), height);
+	//mySpectrRep.setBounds(paddingX, paddingY2, getWidth(), height);
 	//mySpectrRep.setBounds(0, 0, getWidth(), getHeight());
 
+	//auto area = getLocalBounds();
 
+	//mySpectrAnComp.setBounds(area.removeFromTop(height));
+	//mySpectrRep.setBounds(area.removeFromBottom(height));
+
+	juce::Grid grid;
+
+	using Track = juce::Grid::TrackInfo;
+	using Fr = juce::Grid::Fr;
+
+	grid.templateRows = { Track(Fr(1)), Track(Fr(1)), Track(Fr(1)) };
+	grid.templateColumns = { Track(Fr(1))};
+
+	grid.items = { juce::GridItem(mySpectrAnComp), juce::GridItem(mindBSlider), juce::GridItem(mySpectrRep) };
+
+	grid.performLayout(getLocalBounds());
 }
 
+void Loudness_Checker_PluginAudioProcessorEditor::mouseDown(const juce::MouseEvent& e)
+{
+	isClicked = true;
+	repaint();
+}
+
+void Loudness_Checker_PluginAudioProcessorEditor::printRMS(juce::Grid grid)
+{
+	using Track = juce::Grid::TrackInfo;
+	using Fr = juce::Grid::Fr;
+	
+	grid.templateRows = { Track(Fr(1)) };
+	grid.templateColumns = { Track(Fr(1)) };
+
+	grid.items = { juce::GridItem(mySpectrAnComp) };
+
+	grid.performLayout(getLocalBounds());
+}
+
+void Loudness_Checker_PluginAudioProcessorEditor::printSpectr(juce::Grid grid)
+{
+	using Track = juce::Grid::TrackInfo;
+	using Fr = juce::Grid::Fr;
+
+	grid.templateRows = { Track(Fr(1)) };
+	grid.templateColumns = { Track(Fr(1)) };
+
+	grid.items = { juce::GridItem(mySpectrRep) };
+
+	grid.performLayout(getLocalBounds());
+}

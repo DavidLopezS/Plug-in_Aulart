@@ -26,11 +26,21 @@ public:
     //==============================================================================
     void paint (juce::Graphics&) override;
     void resized() override;
+	void mouseDown(const juce::MouseEvent&) override;
+	void printRMS(juce::Grid);
+	void printSpectr(juce::Grid);
 
 	SpectrumAnalyzerComponent mySpectrAnComp;
 	SpectrogramRepresentation mySpectrRep;
 
 private:
+	
+	bool isClicked = true;
+
+	juce::Slider mindBSlider;
+
+	using Attachment = juce::AudioProcessorValueTreeState::SliderAttachment;
+	std::unique_ptr<Attachment> mindBSliderAttatchment;
 
     Loudness_Checker_PluginAudioProcessor& audioProcessor;
 

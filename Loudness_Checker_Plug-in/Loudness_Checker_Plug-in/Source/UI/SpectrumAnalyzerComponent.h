@@ -37,6 +37,8 @@ public:
 		scopeSize = 512 //2048
 	};
 
+	float mindBValue = -100.0f;
+
 private:
 
 	juce::dsp::FFT forwardFFT;
