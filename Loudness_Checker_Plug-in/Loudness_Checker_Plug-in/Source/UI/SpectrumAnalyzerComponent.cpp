@@ -12,7 +12,8 @@
 #include "SpectrumAnalyzerComponent.h"
 
 //==============================================================================
-SpectrumAnalyzerComponent::SpectrumAnalyzerComponent() : forwardFFT(fftOrder), window(fftSize, juce::dsp::WindowingFunction<float>::hann)
+SpectrumAnalyzerComponent::SpectrumAnalyzerComponent() : forwardFFT(fftOrder), window(fftSize, juce::dsp::WindowingFunction<float>::hann), 
+							mindBValue(-100.0f), maxdBValue(0.0f)
 {
 	setOpaque(true);
 	startTimerHz(30);
@@ -79,7 +80,7 @@ void SpectrumAnalyzerComponent::pushNextSampleIntoFifo(float sample) noexcept
 	fifo[fifoIndex++] = sample;
 }
 
-void SpectrumAnalyzerComponent::drawNextFrameOfSpectrum()
+void SpectrumAnalyzerComponent::drawNextFrameOfSpectrum(/*const float mindBVal*/)
 {
 
 	window.multiplyWithWindowingTable(fftData, fftSize);
@@ -87,7 +88,10 @@ void SpectrumAnalyzerComponent::drawNextFrameOfSpectrum()
 	forwardFFT.performFrequencyOnlyForwardTransform(fftData);
 
 	auto mindB = mindBValue;//-100.0f
-	auto maxdB = 0.0f;
+	auto maxdB = maxdBValue;//0.0f
+
+	std::cout << "My Min Value: " << mindB << std::endl;
+	std::cout << "My Tree Value: " << mindBValue << std::endl;
 
 	for (int i = 0; i < scopeSize; ++i)
 	{

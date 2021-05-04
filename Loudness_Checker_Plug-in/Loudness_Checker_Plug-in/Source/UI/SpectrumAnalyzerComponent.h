@@ -27,7 +27,7 @@ public:
 	void mouseDown(const juce::MouseEvent&) override;
 	void pushNextSampleIntoFifo(float) noexcept;
 	void timerCallback() override;
-	void drawNextFrameOfSpectrum();
+	void drawNextFrameOfSpectrum(/*const float*/);
 	void drawFrame(juce::Graphics&);
 
 	enum
@@ -37,7 +37,10 @@ public:
 		scopeSize = 512 //2048
 	};
 
-	float mindBValue = -100.0f;
+	float mindBValue;
+	float maxdBValue;
+
+	
 
 private:
 

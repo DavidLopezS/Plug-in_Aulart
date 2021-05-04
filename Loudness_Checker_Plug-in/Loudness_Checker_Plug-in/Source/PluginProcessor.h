@@ -9,7 +9,6 @@
 #pragma once
 
 #include <JuceHeader.h>
-#include "UI\SpectrumAnalyzerComponent.h"
 
 
 //==============================================================================
@@ -60,8 +59,6 @@ public:
 private:
 
 	juce::AudioProcessorValueTreeState::ParameterLayout createParams();
-
-	SpectrumAnalyzerComponent rmsAnalyzer;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Loudness_Checker_PluginAudioProcessor)
 };

@@ -38,9 +38,11 @@ private:
 	bool isClicked = true;
 
 	juce::Slider mindBSlider;
+	juce::Slider maxdBSlider;
 
 	using Attachment = juce::AudioProcessorValueTreeState::SliderAttachment;
-	std::unique_ptr<Attachment> mindBSliderAttatchment;
+	std::unique_ptr<Attachment> mindBSliderAttachment;
+	std::unique_ptr<Attachment> maxdBSliderAttachment;
 
     Loudness_Checker_PluginAudioProcessor& audioProcessor;
 
