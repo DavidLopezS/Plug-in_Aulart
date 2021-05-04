@@ -150,8 +150,6 @@ void Loudness_Checker_PluginAudioProcessor::processBlock (juce::AudioBuffer<floa
 	auto &maxRMSdB = *apvts.getRawParameterValue("MAXDBKNOBRMS");
 	auto &minRMSdB = *apvts.getRawParameterValue("MINDBKNOWRMS");
 
-	std::cout << minRMSdB.load() << std::endl;
-
 	mySpectrData->mySpectrAnComp.mindBValue = minRMSdB.load();
 	mySpectrData->mySpectrAnComp.maxdBValue = maxRMSdB.load();
 }
