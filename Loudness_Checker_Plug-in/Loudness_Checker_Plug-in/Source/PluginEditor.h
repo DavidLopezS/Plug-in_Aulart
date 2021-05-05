@@ -38,14 +38,17 @@ private:
 	using Attachment = juce::AudioProcessorValueTreeState::SliderAttachment;
 	std::unique_ptr<Attachment> mindBSliderAttachment;
 	std::unique_ptr<Attachment> maxdBSliderAttachment;
-
+	std::unique_ptr<Attachment> lvlKnobSpectrAttachment;
+	std::unique_ptr<Attachment> skPropSpectrAttachment;
+	std::unique_ptr<Attachment> lvlOffSpectrAttachment;
+	
     Loudness_Checker_PluginAudioProcessor& audioProcessor;
 
 	struct KnobManager : public Component
 	{
 		KnobManager(juce::Colour c) : backgroundColour(c)
 		{
-			for(int i = 0; i < 2; ++i)
+			for(int i = 0; i < 5; ++i)
 			{
 				auto* knobSlider = new juce::Slider();
 				knobSlider->setSliderStyle(juce::Slider::SliderStyle::RotaryHorizontalVerticalDrag);

@@ -35,6 +35,10 @@ public:
 		fftSize = 1 << fftOrder //adds the ordet 10 into the binary number, so 10 extra zeros (00010000000000 = 1024)
 	};
 
+	float lvlKnobSpectr;
+	float skewedPropSpectr;
+	float lvlOffsetSpectr;
+
 private:
 
 	juce::dsp::FFT forwardFFT;

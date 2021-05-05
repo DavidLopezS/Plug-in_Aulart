@@ -149,9 +149,15 @@ void Loudness_Checker_PluginAudioProcessor::processBlock (juce::AudioBuffer<floa
 	auto &graftOutputType = *apvts.getRawParameterValue("GRAFTYPE");
 	auto &maxRMSdB = *apvts.getRawParameterValue("MAXDBKNOBRMS");
 	auto &minRMSdB = *apvts.getRawParameterValue("MINDBKNOWRMS");
-
+	auto &lvlKnobSpectr = *apvts.getRawParameterValue("LVLKNOBSPECTR");
+	auto &skPropSpectr = *apvts.getRawParameterValue("SKEWEDPROPYSPECTR");
+	auto &lvlOffSpectr = *apvts.getRawParameterValue("LVLOFFSETSPECTR");
+	
 	mySpectrData->mySpectrAnComp.mindBValue = minRMSdB.load();
 	mySpectrData->mySpectrAnComp.maxdBValue = maxRMSdB.load();
+	mySpectrData->mySpectrRep.lvlKnobSpectr = lvlKnobSpectr.load();
+	mySpectrData->mySpectrRep.skewedPropSpectr = skPropSpectr.load();
+	mySpectrData->mySpectrRep.lvlOffsetSpectr = lvlOffSpectr.load();
 }
 
 //==============================================================================
@@ -191,13 +197,23 @@ juce::AudioProcessorValueTreeState::ParameterLayout Loudness_Checker_PluginAudio
 {
 	std::vector<std::unique_ptr<juce::RangedAudioParameter>> params;
 
+	//Representation Switch
 	params.push_back(std::make_unique<juce::AudioParameterChoice>("GRAFTYPE", "Graf Type", juce::StringArray{ "RMS", "Spectrogram" }, 0));
 
 	//Max db Knob RMS
-	params.push_back(std::make_unique<juce::AudioParameterFloat>("MAXDBKNOBRMS", "Max db Knob RMS", juce::NormalisableRange<float>{0.0f, 100.0f, 0.1}, 0.0f));
+	params.push_back(std::make_unique<juce::AudioParameterFloat>("MAXDBKNOBRMS", "Max db Knob RMS", juce::NormalisableRange<float>{0.0f, 100.0f, 0.1f}, 0.0f));
 
-	//Min db Know RMS
-	params.push_back(std::make_unique<juce::AudioParameterFloat>("MINDBKNOWRMS", "Min db Knob RMS", juce::NormalisableRange<float>{-100.0f, -1.0f, 0.1}, -100.0f));
+	//Min db Knob RMS
+	params.push_back(std::make_unique<juce::AudioParameterFloat>("MINDBKNOWRMS", "Min db Knob RMS", juce::NormalisableRange<float>{-100.0f, -1.0f, 0.1f}, -100.0f));
+
+	//Lvl Knob Spectrogram
+	params.push_back(std::make_unique<juce::AudioParameterFloat>("LVLKNOBSPECTR", "Level Knob Spectrogram", juce::NormalisableRange<float>{0.00001f, 5.0f, 0.1f}, 0.1f));
+
+	//Skewed Proportion Y Spectrogram
+	params.push_back(std::make_unique<juce::AudioParameterFloat>("SKEWEDPROPYSPECTR", "Skewed Proportion Y Spectrogram", juce::NormalisableRange<float>{0.1f, 1.0f, 0.1f}, 0.1f));
+
+	//Level Offset Spectrogram
+	params.push_back(std::make_unique<juce::AudioParameterFloat>("LVLOFFSETSPECTR", "Level Offset Spectrogram", juce::NormalisableRange<float>{0.0f, 5.0f, 0.1f}, 2.0f));
 
 	return{ params.begin(), params.end() };
 
