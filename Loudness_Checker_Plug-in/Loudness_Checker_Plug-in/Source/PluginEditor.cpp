@@ -12,21 +12,18 @@
 
 //==============================================================================
 Loudness_Checker_PluginAudioProcessorEditor::Loudness_Checker_PluginAudioProcessorEditor (Loudness_Checker_PluginAudioProcessor& p)
-    : AudioProcessorEditor (&p), audioProcessor (p)
+    : AudioProcessorEditor (&p), audioProcessor (p), mydBKnobs(juce::Colours::darkgrey)
 {
 	setOpaque(true);
 
-	mindBSlider.setSliderStyle(juce::Slider::SliderStyle::RotaryHorizontalVerticalDrag);
-	mindBSlider.setTextBoxStyle(juce::Slider::TextBoxBelow, true, 100, 50);
-	addAndMakeVisible(mindBSlider);
+	addAndMakeVisible(&mydBKnobs);
 
-	maxdBSlider.setSliderStyle(juce::Slider::SliderStyle::RotaryHorizontalVerticalDrag);
-	maxdBSlider.setTextBoxStyle(juce::Slider::TextBoxBelow, true, 100, 50);
-	addAndMakeVisible(maxdBSlider);
+	auto &mindbKnob = *mydBKnobs.myKnobs[0];
+	auto &maxdbKnob = *mydBKnobs.myKnobs[1];
 
 	using Attachment = juce::AudioProcessorValueTreeState::SliderAttachment;
-	mindBSliderAttachment = std::make_unique<Attachment>(audioProcessor.apvts, "MINDBKNOWRMS", mindBSlider);
-	maxdBSliderAttachment = std::make_unique<Attachment>(audioProcessor.apvts, "MAXDBKNOBRMS", maxdBSlider);
+	mindBSliderAttachment = std::make_unique<Attachment>(audioProcessor.apvts, "MINDBKNOWRMS", mindbKnob);
+	maxdBSliderAttachment = std::make_unique<Attachment>(audioProcessor.apvts, "MAXDBKNOBRMS", maxdbKnob);
 
 	addAndMakeVisible(&mySpectrAnComp);
 	addAndMakeVisible(&mySpectrRep);
@@ -36,6 +33,8 @@ Loudness_Checker_PluginAudioProcessorEditor::Loudness_Checker_PluginAudioProcess
 
 Loudness_Checker_PluginAudioProcessorEditor::~Loudness_Checker_PluginAudioProcessorEditor()
 {
+	mindBSliderAttachment = NULL;
+	maxdBSliderAttachment = NULL;
 }
 
 //==============================================================================
@@ -69,9 +68,9 @@ void Loudness_Checker_PluginAudioProcessorEditor::resized()
 	using Fr = juce::Grid::Fr;
 
 	grid.templateRows = { Track(Fr(1)), Track(Fr(1)), Track(Fr(1)) };
-	grid.templateColumns = { Track(Fr(1)), Track(Fr(1)) };
+	grid.templateColumns = { Track(Fr(1)) };
 
-	grid.items = { juce::GridItem(mySpectrAnComp), juce::GridItem(mindBSlider), juce::GridItem(maxdBSlider), juce::GridItem(mySpectrRep) };
+	grid.items = { juce::GridItem(mySpectrAnComp), juce::GridItem(mydBKnobs), juce::GridItem(mySpectrRep) };
 
 	grid.performLayout(getLocalBounds());
 }
@@ -80,30 +79,4 @@ void Loudness_Checker_PluginAudioProcessorEditor::mouseDown(const juce::MouseEve
 {
 	isClicked = true;
 	repaint();
-}
-
-void Loudness_Checker_PluginAudioProcessorEditor::printRMS(juce::Grid grid)
-{
-	using Track = juce::Grid::TrackInfo;
-	using Fr = juce::Grid::Fr;
-	
-	grid.templateRows = { Track(Fr(1)) };
-	grid.templateColumns = { Track(Fr(1)) };
-
-	grid.items = { juce::GridItem(mySpectrAnComp) };
-
-	grid.performLayout(getLocalBounds());
-}
-
-void Loudness_Checker_PluginAudioProcessorEditor::printSpectr(juce::Grid grid)
-{
-	using Track = juce::Grid::TrackInfo;
-	using Fr = juce::Grid::Fr;
-
-	grid.templateRows = { Track(Fr(1)) };
-	grid.templateColumns = { Track(Fr(1)) };
-
-	grid.items = { juce::GridItem(mySpectrRep) };
-
-	grid.performLayout(getLocalBounds());
 }

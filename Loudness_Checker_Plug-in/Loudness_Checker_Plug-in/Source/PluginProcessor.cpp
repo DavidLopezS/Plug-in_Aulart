@@ -197,7 +197,7 @@ juce::AudioProcessorValueTreeState::ParameterLayout Loudness_Checker_PluginAudio
 	params.push_back(std::make_unique<juce::AudioParameterFloat>("MAXDBKNOBRMS", "Max db Knob RMS", juce::NormalisableRange<float>{0.0f, 100.0f, 0.1}, 0.0f));
 
 	//Min db Know RMS
-	params.push_back(std::make_unique<juce::AudioParameterFloat>("MINDBKNOWRMS", "Min db Knob RMS", juce::NormalisableRange<float>{-100.0f, 0.0f, 0.1}, -100.0f));
+	params.push_back(std::make_unique<juce::AudioParameterFloat>("MINDBKNOWRMS", "Min db Knob RMS", juce::NormalisableRange<float>{-100.0f, -1.0f, 0.1}, -100.0f));
 
 	return{ params.begin(), params.end() };
 
