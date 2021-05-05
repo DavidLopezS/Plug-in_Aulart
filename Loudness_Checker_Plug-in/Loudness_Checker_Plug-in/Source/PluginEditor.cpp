@@ -23,10 +23,14 @@ Loudness_Checker_PluginAudioProcessorEditor::Loudness_Checker_PluginAudioProcess
 	auto &lvlSpectrKnob = *mydBKnobs.myKnobs[2];
 	auto &skPropSpectrKnob = *mydBKnobs.myKnobs[3];
 	auto &lvlOffSpectrKnob = *mydBKnobs.myKnobs[4];
+	auto &skPropRMSKnob = *mydBKnobs.myKnobs[5];
+	auto &lvlOffRMSKnob = *mydBKnobs.myKnobs[6];
 
 	using Attachment = juce::AudioProcessorValueTreeState::SliderAttachment;
 	mindBSliderAttachment = std::make_unique<Attachment>(audioProcessor.apvts, "MINDBKNOWRMS", mindbKnob);
 	maxdBSliderAttachment = std::make_unique<Attachment>(audioProcessor.apvts, "MAXDBKNOBRMS", maxdbKnob);
+	skPropRMSAttachment = std::make_unique<Attachment>(audioProcessor.apvts, "SKEWEDPROPYRMS", skPropRMSKnob);
+	lvlOffRMSAttachment = std::make_unique<Attachment>(audioProcessor.apvts, "LVLOFFSETRMS", lvlOffRMSKnob);
 	lvlKnobSpectrAttachment = std::make_unique<Attachment>(audioProcessor.apvts, "LVLKNOBSPECTR", lvlSpectrKnob);
 	skPropSpectrAttachment = std::make_unique<Attachment>(audioProcessor.apvts, "SKEWEDPROPYSPECTR", skPropSpectrKnob);
 	lvlOffSpectrAttachment = std::make_unique<Attachment>(audioProcessor.apvts, "LVLOFFSETSPECTR", lvlOffSpectrKnob);
@@ -41,6 +45,8 @@ Loudness_Checker_PluginAudioProcessorEditor::~Loudness_Checker_PluginAudioProces
 {
 	mindBSliderAttachment = NULL;
 	maxdBSliderAttachment = NULL;
+	skPropRMSAttachment = NULL;
+	lvlOffRMSAttachment = NULL;
 	lvlKnobSpectrAttachment = NULL;
 	skPropSpectrAttachment = NULL;
 	lvlOffSpectrAttachment = NULL;

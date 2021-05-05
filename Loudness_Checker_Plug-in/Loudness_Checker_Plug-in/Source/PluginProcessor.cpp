@@ -149,12 +149,16 @@ void Loudness_Checker_PluginAudioProcessor::processBlock (juce::AudioBuffer<floa
 	auto &graftOutputType = *apvts.getRawParameterValue("GRAFTYPE");
 	auto &maxRMSdB = *apvts.getRawParameterValue("MAXDBKNOBRMS");
 	auto &minRMSdB = *apvts.getRawParameterValue("MINDBKNOWRMS");
+	auto &skPropRMS = *apvts.getRawParameterValue("SKEWEDPROPYRMS");
+	auto &lvlOffRMS = *apvts.getRawParameterValue("LVLOFFSETRMS");
 	auto &lvlKnobSpectr = *apvts.getRawParameterValue("LVLKNOBSPECTR");
 	auto &skPropSpectr = *apvts.getRawParameterValue("SKEWEDPROPYSPECTR");
 	auto &lvlOffSpectr = *apvts.getRawParameterValue("LVLOFFSETSPECTR");
 	
 	mySpectrData->mySpectrAnComp.mindBValue = minRMSdB.load();
 	mySpectrData->mySpectrAnComp.maxdBValue = maxRMSdB.load();
+	mySpectrData->mySpectrAnComp.skewedYKnobRMS = skPropRMS.load();
+	mySpectrData->mySpectrAnComp.lvlOffsetRMS = lvlOffRMS.load();
 	mySpectrData->mySpectrRep.lvlKnobSpectr = lvlKnobSpectr.load();
 	mySpectrData->mySpectrRep.skewedPropSpectr = skPropSpectr.load();
 	mySpectrData->mySpectrRep.lvlOffsetSpectr = lvlOffSpectr.load();
@@ -205,6 +209,12 @@ juce::AudioProcessorValueTreeState::ParameterLayout Loudness_Checker_PluginAudio
 
 	//Min db Knob RMS
 	params.push_back(std::make_unique<juce::AudioParameterFloat>("MINDBKNOWRMS", "Min db Knob RMS", juce::NormalisableRange<float>{-100.0f, -1.0f, 0.1f}, -100.0f));
+
+	//Skewed Proportion Y RMS
+	params.push_back(std::make_unique<juce::AudioParameterFloat>("SKEWEDPROPYRMS", "Skewed Proportion Y RMS", juce::NormalisableRange<float>{0.1f, 1.0f, 0.1f}, 0.2f));
+
+	//Level Offset RMS
+	params.push_back(std::make_unique<juce::AudioParameterFloat>("LVLOFFSETRMS", "Level Offset RMS", juce::NormalisableRange<float>{0.0f, 5.0f, 0.1f}, 1.0f));
 
 	//Lvl Knob Spectrogram
 	params.push_back(std::make_unique<juce::AudioParameterFloat>("LVLKNOBSPECTR", "Level Knob Spectrogram", juce::NormalisableRange<float>{0.00001f, 5.0f, 0.1f}, 0.1f));

@@ -39,6 +39,8 @@ public:
 
 	float mindBValue;
 	float maxdBValue;
+	float skewedYKnobRMS;
+	float lvlOffsetRMS;
 
 	
 

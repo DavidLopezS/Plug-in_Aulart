@@ -13,7 +13,7 @@
 
 //==============================================================================
 SpectrumAnalyzerComponent::SpectrumAnalyzerComponent() : forwardFFT(fftOrder), window(fftSize, juce::dsp::WindowingFunction<float>::hann), 
-							mindBValue(-100.0f), maxdBValue(0.0f)
+							mindBValue(-100.0f), maxdBValue(0.0f), skewedYKnobRMS(0.2f), lvlOffsetRMS(1.0f)
 {
 	setOpaque(true);
 	startTimerHz(30);

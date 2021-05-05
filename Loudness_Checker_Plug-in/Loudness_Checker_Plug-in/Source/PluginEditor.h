@@ -38,6 +38,8 @@ private:
 	using Attachment = juce::AudioProcessorValueTreeState::SliderAttachment;
 	std::unique_ptr<Attachment> mindBSliderAttachment;
 	std::unique_ptr<Attachment> maxdBSliderAttachment;
+	std::unique_ptr<Attachment> skPropRMSAttachment;
+	std::unique_ptr<Attachment> lvlOffRMSAttachment;
 	std::unique_ptr<Attachment> lvlKnobSpectrAttachment;
 	std::unique_ptr<Attachment> skPropSpectrAttachment;
 	std::unique_ptr<Attachment> lvlOffSpectrAttachment;
@@ -48,7 +50,7 @@ private:
 	{
 		KnobManager(juce::Colour c) : backgroundColour(c)
 		{
-			for(int i = 0; i < 5; ++i)
+			for(int i = 0; i < 7; ++i)
 			{
 				auto* knobSlider = new juce::Slider();
 				knobSlider->setSliderStyle(juce::Slider::SliderStyle::RotaryHorizontalVerticalDrag);
