@@ -27,7 +27,7 @@ public:
     void paint (juce::Graphics&) override;
     void resized() override;
 	void mouseDown(const juce::MouseEvent&) override;
-	void knobAttachment();
+	void knobAttachment(int, juce::String);
 
 	SpectrumAnalyzerComponent mySpectrAnComp;
 	SpectrogramRepresentation mySpectrRep;
@@ -42,13 +42,7 @@ private:
 
 	using Attachment = juce::AudioProcessorValueTreeState::SliderAttachment;
 	
-	std::unique_ptr<Attachment> mindBSliderAttachment;
-	std::unique_ptr<Attachment> maxdBSliderAttachment;
-	std::unique_ptr<Attachment> skPropRMSAttachment;
-	std::unique_ptr<Attachment> lvlOffRMSAttachment;
-	std::unique_ptr<Attachment> lvlKnobSpectrAttachment;
-	std::unique_ptr<Attachment> skPropSpectrAttachment;
-	std::unique_ptr<Attachment> lvlOffSpectrAttachment;
+	std::vector<std::unique_ptr<Attachment>> myAttachments;
 	
     Loudness_Checker_PluginAudioProcessor& audioProcessor;
 

@@ -92,10 +92,10 @@ void SpectrumAnalyzerComponent::drawNextFrameOfSpectrum(/*const float mindBVal*/
 
 	for (int i = 0; i < scopeSize; ++i)
 	{
-		auto skewedProportionX = 1.0f - std::exp(std::log(1.0f - (float)i / (float)scopeSize) * 0.2f);
+		auto skewedProportionX = 1.0f - std::exp(std::log(1.0f - (float)i / (float)scopeSize) * skewedYKnobRMS);//0.2f
 		auto fftDataIndex = juce::jlimit(0, fftSize / 2, (int)(skewedProportionX * (float)fftSize * 0.5f));
 		auto level = juce::jmap(juce::jlimit(mindB, maxdB, juce::Decibels::gainToDecibels(fftData[fftDataIndex]) - juce::Decibels::gainToDecibels((float)fftSize)),
-			mindB, maxdB, 0.0f, 1.0f);
+			mindB, maxdB, 0.0f, lvlOffsetRMS);//1.0f
 
 		scopeData[i] = level;
 	}

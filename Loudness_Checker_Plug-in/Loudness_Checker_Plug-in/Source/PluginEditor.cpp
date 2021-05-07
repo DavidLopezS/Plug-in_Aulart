@@ -18,7 +18,8 @@ Loudness_Checker_PluginAudioProcessorEditor::Loudness_Checker_PluginAudioProcess
 
 	addAndMakeVisible(&mydBKnobs);
 	
-	knobAttachment();
+	for(int i = 0; i < numKnobs; ++i)
+		knobAttachment(i, myKnobName[i]);
 
 	addAndMakeVisible(&mySpectrAnComp);
 	addAndMakeVisible(&mySpectrRep);
@@ -28,13 +29,7 @@ Loudness_Checker_PluginAudioProcessorEditor::Loudness_Checker_PluginAudioProcess
 
 Loudness_Checker_PluginAudioProcessorEditor::~Loudness_Checker_PluginAudioProcessorEditor()
 {
-	mindBSliderAttachment = NULL;
-	maxdBSliderAttachment = NULL;
-	skPropRMSAttachment = NULL;
-	lvlOffRMSAttachment = NULL;
-	lvlKnobSpectrAttachment = NULL;
-	skPropSpectrAttachment = NULL;
-	lvlOffSpectrAttachment = NULL;
+	myAttachments.clear();
 }
 
 //==============================================================================
@@ -81,24 +76,11 @@ void Loudness_Checker_PluginAudioProcessorEditor::mouseDown(const juce::MouseEve
 	repaint();
 }
 
-void Loudness_Checker_PluginAudioProcessorEditor::knobAttachment()
+void Loudness_Checker_PluginAudioProcessorEditor::knobAttachment(int id, juce::String knobName)
 {
-
-	auto &mindbKnob = *mydBKnobs.myKnobs[0];
-	auto &maxdbKnob = *mydBKnobs.myKnobs[1];
-	auto &lvlSpectrKnob = *mydBKnobs.myKnobs[2];
-	auto &skPropSpectrKnob = *mydBKnobs.myKnobs[3];
-	auto &lvlOffSpectrKnob = *mydBKnobs.myKnobs[4];
-	auto &skPropRMSKnob = *mydBKnobs.myKnobs[5];
-	auto &lvlOffRMSKnob = *mydBKnobs.myKnobs[6];
+	auto &myKnob = *mydBKnobs.myKnobs[id];
 
 	using Attachment = juce::AudioProcessorValueTreeState::SliderAttachment;
-	mindBSliderAttachment = std::make_unique<Attachment>(audioProcessor.apvts, "MINDBKNOWRMS", mindbKnob);
-	maxdBSliderAttachment = std::make_unique<Attachment>(audioProcessor.apvts, "MAXDBKNOBRMS", maxdbKnob);
-	skPropRMSAttachment = std::make_unique<Attachment>(audioProcessor.apvts, "SKEWEDPROPYRMS", skPropRMSKnob);
-	lvlOffRMSAttachment = std::make_unique<Attachment>(audioProcessor.apvts, "LVLOFFSETRMS", lvlOffRMSKnob);
-	lvlKnobSpectrAttachment = std::make_unique<Attachment>(audioProcessor.apvts, "LVLKNOBSPECTR", lvlSpectrKnob);
-	skPropSpectrAttachment = std::make_unique<Attachment>(audioProcessor.apvts, "SKEWEDPROPYSPECTR", skPropSpectrKnob);
-	lvlOffSpectrAttachment = std::make_unique<Attachment>(audioProcessor.apvts, "LVLOFFSETSPECTR", lvlOffSpectrKnob);
 
+	myAttachments.push_back(std::make_unique<Attachment>(audioProcessor.apvts, knobName, myKnob));
 }
