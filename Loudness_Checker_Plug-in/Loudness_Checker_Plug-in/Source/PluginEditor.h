@@ -27,6 +27,7 @@ public:
     void paint (juce::Graphics&) override;
     void resized() override;
 	void mouseDown(const juce::MouseEvent&) override;
+	void knobAttachment();
 
 	SpectrumAnalyzerComponent mySpectrAnComp;
 	SpectrogramRepresentation mySpectrRep;
@@ -35,7 +36,12 @@ private:
 	
 	bool isClicked = true;
 
+	static constexpr auto numKnobs = 7;
+
+	juce::String myKnobName[numKnobs] = { "MINDBKNOWRMS", "MAXDBKNOBRMS", "SKEWEDPROPYRMS", "LVLOFFSETRMS", "LVLKNOBSPECTR", "SKEWEDPROPYSPECTR", "LVLOFFSETSPECTR" };
+
 	using Attachment = juce::AudioProcessorValueTreeState::SliderAttachment;
+	
 	std::unique_ptr<Attachment> mindBSliderAttachment;
 	std::unique_ptr<Attachment> maxdBSliderAttachment;
 	std::unique_ptr<Attachment> skPropRMSAttachment;
