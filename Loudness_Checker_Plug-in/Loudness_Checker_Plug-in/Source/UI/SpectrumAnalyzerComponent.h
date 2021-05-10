@@ -38,7 +38,6 @@ public:
 		scopeSize = 512 //2048 max:32768 min:128
 	};
 	
-
 	float mindBValue;
 	float maxdBValue;
 	float skewedYKnobRMS;
