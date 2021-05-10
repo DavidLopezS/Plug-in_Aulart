@@ -80,7 +80,7 @@ void SpectrumAnalyzerComponent::pushNextSampleIntoFifo(float sample) noexcept
 	fifo[fifoIndex++] = sample;
 }
 
-void SpectrumAnalyzerComponent::drawNextFrameOfSpectrum(/*const float mindBVal*/)
+void SpectrumAnalyzerComponent::drawNextFrameOfSpectrum()
 {
 
 	window.multiplyWithWindowingTable(fftData, fftSize);

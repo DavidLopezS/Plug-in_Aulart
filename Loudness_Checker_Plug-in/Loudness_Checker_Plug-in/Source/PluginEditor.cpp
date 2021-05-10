@@ -19,7 +19,7 @@ Loudness_Checker_PluginAudioProcessorEditor::Loudness_Checker_PluginAudioProcess
 	addAndMakeVisible(&mydBKnobs);
 	
 	for(int i = 0; i < numKnobs; ++i)
-		knobAttachment(i, myKnobName[i]);
+		knobAttachment(i);
 
 	addAndMakeVisible(&mySpectrAnComp);
 	addAndMakeVisible(&mySpectrRep);
@@ -76,11 +76,10 @@ void Loudness_Checker_PluginAudioProcessorEditor::mouseDown(const juce::MouseEve
 	repaint();
 }
 
-void Loudness_Checker_PluginAudioProcessorEditor::knobAttachment(int id, juce::String knobName)
+void Loudness_Checker_PluginAudioProcessorEditor::knobAttachment(int knobId)
 {
-	auto &myKnob = *mydBKnobs.myKnobs[id];
+	auto &myKnob = *mydBKnobs.myKnobs[knobId];
 
 	using Attachment = juce::AudioProcessorValueTreeState::SliderAttachment;
-
-	myAttachments.push_back(std::make_unique<Attachment>(audioProcessor.apvts, knobName, myKnob));
+	myAttachments.push_back(std::make_unique<Attachment>(audioProcessor.apvts, myKnobName[knobId], myKnob));
 }

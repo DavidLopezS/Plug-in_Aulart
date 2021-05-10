@@ -27,7 +27,7 @@ public:
     void paint (juce::Graphics&) override;
     void resized() override;
 	void mouseDown(const juce::MouseEvent&) override;
-	void knobAttachment(int, juce::String);
+	void knobAttachment(int);
 
 	SpectrumAnalyzerComponent mySpectrAnComp;
 	SpectrogramRepresentation mySpectrRep;
@@ -41,7 +41,6 @@ private:
 	juce::String myKnobName[numKnobs] = { "MINDBKNOWRMS", "MAXDBKNOBRMS", "SKEWEDPROPYRMS", "LVLOFFSETRMS", "LVLKNOBSPECTR", "SKEWEDPROPYSPECTR", "LVLOFFSETSPECTR" };
 
 	using Attachment = juce::AudioProcessorValueTreeState::SliderAttachment;
-	
 	std::vector<std::unique_ptr<Attachment>> myAttachments;
 	
     Loudness_Checker_PluginAudioProcessor& audioProcessor;
@@ -50,7 +49,7 @@ private:
 	{
 		KnobManager(juce::Colour c) : backgroundColour(c)
 		{
-			for(int i = 0; i < 7; ++i)
+			for(int i = 0; i < numKnobs; ++i)
 			{
 				auto* knobSlider = new juce::Slider();
 				knobSlider->setSliderStyle(juce::Slider::SliderStyle::RotaryHorizontalVerticalDrag);

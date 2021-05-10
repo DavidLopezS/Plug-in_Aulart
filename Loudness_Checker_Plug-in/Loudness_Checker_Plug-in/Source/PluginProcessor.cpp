@@ -139,13 +139,6 @@ void Loudness_Checker_PluginAudioProcessor::processBlock (juce::AudioBuffer<floa
         buffer.clear (i, 0, buffer.getNumSamples());
 
 
-	auto mySpectrData = dynamic_cast<Loudness_Checker_PluginAudioProcessorEditor*>(getActiveEditor());
-	if (mySpectrData != nullptr)
-	{
-		mySpectrData->mySpectrAnComp.processAudioBlock(buffer);//RMS buffer input
-		mySpectrData->mySpectrRep.processAudioBlock(buffer);//Spectrogram buffer input
-	}
-
 	auto &graftOutputType = *apvts.getRawParameterValue("GRAFTYPE");
 	auto &maxRMSdB = *apvts.getRawParameterValue("MAXDBKNOBRMS");
 	auto &minRMSdB = *apvts.getRawParameterValue("MINDBKNOWRMS");
@@ -154,14 +147,21 @@ void Loudness_Checker_PluginAudioProcessor::processBlock (juce::AudioBuffer<floa
 	auto &lvlKnobSpectr = *apvts.getRawParameterValue("LVLKNOBSPECTR");
 	auto &skPropSpectr = *apvts.getRawParameterValue("SKEWEDPROPYSPECTR");
 	auto &lvlOffSpectr = *apvts.getRawParameterValue("LVLOFFSETSPECTR");
+
+	auto mySpectrData = dynamic_cast<Loudness_Checker_PluginAudioProcessorEditor*>(getActiveEditor());
+	if (mySpectrData != nullptr)
+	{
+		mySpectrData->mySpectrAnComp.processAudioBlock(buffer);//RMS buffer input
+		mySpectrData->mySpectrRep.processAudioBlock(buffer);//Spectrogram buffer input
 	
-	mySpectrData->mySpectrAnComp.mindBValue = minRMSdB.load();
-	mySpectrData->mySpectrAnComp.maxdBValue = maxRMSdB.load();
-	mySpectrData->mySpectrAnComp.skewedYKnobRMS = skPropRMS.load();
-	mySpectrData->mySpectrAnComp.lvlOffsetRMS = lvlOffRMS.load();
-	mySpectrData->mySpectrRep.lvlKnobSpectr = lvlKnobSpectr.load();
-	mySpectrData->mySpectrRep.skewedPropSpectr = skPropSpectr.load();
-	mySpectrData->mySpectrRep.lvlOffsetSpectr = lvlOffSpectr.load();
+		mySpectrData->mySpectrAnComp.mindBValue = minRMSdB.load();
+		mySpectrData->mySpectrAnComp.maxdBValue = maxRMSdB.load();
+		mySpectrData->mySpectrAnComp.skewedYKnobRMS = skPropRMS.load();
+		mySpectrData->mySpectrAnComp.lvlOffsetRMS = lvlOffRMS.load();
+		mySpectrData->mySpectrRep.lvlKnobSpectr = lvlKnobSpectr.load();
+		mySpectrData->mySpectrRep.skewedPropSpectr = skPropSpectr.load();
+		mySpectrData->mySpectrRep.lvlOffsetSpectr = lvlOffSpectr.load();
+	}
 }
 
 //==============================================================================
