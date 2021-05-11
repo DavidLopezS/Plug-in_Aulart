@@ -143,6 +143,7 @@ void Loudness_Checker_PluginAudioProcessor::processBlock (juce::AudioBuffer<floa
 	auto &maxRMSdB = *apvts.getRawParameterValue("MAXDBKNOBRMS");
 	auto &minRMSdB = *apvts.getRawParameterValue("MINDBKNOWRMS");
 	auto &skPropRMS = *apvts.getRawParameterValue("SKEWEDPROPYRMS");
+	auto &indexDataRMS = *apvts.getRawParameterValue("FFTDATAINDEXRMS");
 	auto &lvlOffRMS = *apvts.getRawParameterValue("LVLOFFSETRMS");
 	auto &lvlKnobSpectr = *apvts.getRawParameterValue("LVLKNOBSPECTR");
 	auto &skPropSpectr = *apvts.getRawParameterValue("SKEWEDPROPYSPECTR");
@@ -157,6 +158,7 @@ void Loudness_Checker_PluginAudioProcessor::processBlock (juce::AudioBuffer<floa
 		mySpectrData->mySpectrAnComp.mindBValue = minRMSdB.load();
 		mySpectrData->mySpectrAnComp.maxdBValue = maxRMSdB.load();
 		mySpectrData->mySpectrAnComp.skewedYKnobRMS = skPropRMS.load();
+		mySpectrData->mySpectrAnComp.dataIndexKnob = indexDataRMS.load();
 		mySpectrData->mySpectrAnComp.lvlOffsetRMS = lvlOffRMS.load();
 		mySpectrData->mySpectrRep.lvlKnobSpectr = lvlKnobSpectr.load();
 		mySpectrData->mySpectrRep.skewedPropSpectr = skPropSpectr.load();
@@ -211,7 +213,10 @@ juce::AudioProcessorValueTreeState::ParameterLayout Loudness_Checker_PluginAudio
 	params.push_back(std::make_unique<juce::AudioParameterFloat>("MINDBKNOWRMS", "Min db Knob RMS", juce::NormalisableRange<float>{-100.0f, -1.0f, 0.1f}, -100.0f));
 
 	//Skewed Proportion Y RMS
-	params.push_back(std::make_unique<juce::AudioParameterFloat>("SKEWEDPROPYRMS", "Skewed Proportion Y RMS", juce::NormalisableRange<float>{0.1f, 1.0f, 0.1f}, 0.2f));
+	params.push_back(std::make_unique<juce::AudioParameterFloat>("SKEWEDPROPYRMS", "Skewed Proportion Y RMS", juce::NormalisableRange<float>{0.1f, 1.0f, 0.1f}, 0.3f));
+
+	//FFT Data Index RMS
+	params.push_back(std::make_unique<juce::AudioParameterFloat>("FFTDATAINDEXRMS", "Fft Data Index RMS", juce::NormalisableRange<float>{0.1f, 1.0f, 0.1f}, 0.5f));
 
 	//Level Offset RMS
 	params.push_back(std::make_unique<juce::AudioParameterFloat>("LVLOFFSETRMS", "Level Offset RMS", juce::NormalisableRange<float>{0.0f, 5.0f, 0.1f}, 1.0f));

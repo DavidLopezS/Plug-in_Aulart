@@ -35,12 +35,13 @@ public:
 	{
 		fftOrder = 11,
 		fftSize = 1 << fftOrder,
-		scopeSize = 512 //2048 max:32768 min:128
+		scopeSize = 2048 //512 max:32768 min:128
 	};
 	
 	float mindBValue;
 	float maxdBValue;
 	float skewedYKnobRMS;
+	float dataIndexKnob;
 	float lvlOffsetRMS;
 
 private:

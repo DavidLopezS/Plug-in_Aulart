@@ -46,7 +46,7 @@ void Loudness_Checker_PluginAudioProcessorEditor::resized()
 	//const auto paddingY = 35;
 	//const auto paddingY2 = 300;
 	//const auto width = 300;
-	//const auto height = 200;
+	//const auto height = 175;
 	
 	//mySpectrAnComp.setBounds(paddingX, paddingY, getWidth(), height);
 	//mySpectrRep.setBounds(paddingX, paddingY2, getWidth(), height);
@@ -82,4 +82,9 @@ void Loudness_Checker_PluginAudioProcessorEditor::knobAttachment(int knobId)
 
 	using Attachment = juce::AudioProcessorValueTreeState::SliderAttachment;
 	myAttachments.push_back(std::make_unique<Attachment>(audioProcessor.apvts, myKnobName[knobId], myKnob));
+
+	//myKnobLabels[knobId].setColour(juce::Label::ColourIds::textColourId, juce::Colours::white);
+	//myKnobLabels[knobId].setFont(15.0f);
+	//myKnobLabels[knobId].setJustificationType(juce::Justification::centred);
+	//addAndMakeVisible(myKnobLabels[knobId]);
 }

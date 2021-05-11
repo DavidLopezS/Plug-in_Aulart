@@ -13,7 +13,7 @@
 
 //==============================================================================
 SpectrumAnalyzerComponent::SpectrumAnalyzerComponent() : forwardFFT(fftOrder), window(fftSize, juce::dsp::WindowingFunction<float>::hann), 
-							mindBValue(-100.0f), maxdBValue(0.0f), skewedYKnobRMS(0.2f), lvlOffsetRMS(1.0f)
+							mindBValue(-100.0f), maxdBValue(0.0f), skewedYKnobRMS(0.3f), dataIndexKnob(0.5f), lvlOffsetRMS(1.0f)
 {
 	setOpaque(true);
 	startTimerHz(30);
@@ -96,7 +96,7 @@ void SpectrumAnalyzerComponent::drawNextFrameOfSpectrum()
 	for (int i = 0; i < scopeSize; ++i)
 	{
 		auto skewedProportionX = 1.0f - std::exp(std::log(1.0f - (float)i / (float)scopeSize) * skewedYKnobRMS);//0.2f
-		auto fftDataIndex = juce::jlimit(0, fftSize / 2, (int)(skewedProportionX * (float)fftSize * 0.5f));
+		auto fftDataIndex = juce::jlimit(0, fftSize / 2, (int)(skewedProportionX * (float)fftSize * dataIndexKnob));//0.5f
 		auto level = juce::jmap(juce::jlimit(mindB, maxdB, juce::Decibels::gainToDecibels(fftData[fftDataIndex]) - juce::Decibels::gainToDecibels((float)fftSize)),
 			mindB, maxdB, 0.0f, lvlOffsetRMS);//1.0f
 

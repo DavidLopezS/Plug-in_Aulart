@@ -39,6 +39,7 @@ void SpectrogramRepresentation::paint (juce::Graphics& g)
 	g.fillAll(juce::Colours::grey);
 
 	g.setOpacity(1.0f);
+	g.drawText("Spectrogram", getLocalBounds(), juce::Justification::centredTop);
 	g.drawImage(spectrogramImage, getLocalBounds().toFloat());	
 
 	g.clipRegionIntersects(getLocalBounds());
