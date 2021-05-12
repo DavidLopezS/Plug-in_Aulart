@@ -13,7 +13,7 @@
 
 //==============================================================================
 SpectrogramRepresentation::SpectrogramRepresentation() : forwardFFT(fftOrder), spectrogramImage(juce::Image::RGB, 512, 512, true), 
-														 lvlKnobSpectr(0.1), skewedPropSpectr(0.1f), lvlOffsetSpectr(2.0f)
+														 lvlKnobSpectr(4.1f), skewedPropSpectr(0.4f), lvlOffsetSpectr(3.9f)
 {
 	setOpaque(true);
 	startTimerHz(60);
