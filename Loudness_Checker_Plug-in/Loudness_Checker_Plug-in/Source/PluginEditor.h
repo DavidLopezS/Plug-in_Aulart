@@ -34,7 +34,7 @@ public:
 
 private:
 	
-	bool isClicked = true;
+	bool isClicked = false;
 
 	static constexpr auto numKnobs = 8;
 

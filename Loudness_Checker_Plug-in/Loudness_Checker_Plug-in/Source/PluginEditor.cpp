@@ -33,10 +33,9 @@ Loudness_Checker_PluginAudioProcessorEditor::~Loudness_Checker_PluginAudioProces
 }
 
 //==============================================================================
-void Loudness_Checker_PluginAudioProcessorEditor::paint (juce::Graphics& g)
+void Loudness_Checker_PluginAudioProcessorEditor::paint(juce::Graphics& g)
 {
 	g.fillAll(juce::Colours::darkgrey);
-
 }
 
 void Loudness_Checker_PluginAudioProcessorEditor::resized()

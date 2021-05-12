@@ -45,6 +45,10 @@ void SpectrumAnalyzerComponent::paint (juce::Graphics& g)
 
 	g.drawText("RMS", getLocalBounds(), juce::Justification::centredTop);
 	g.clipRegionIntersects(getLocalBounds());
+
+	g.setColour(juce::Colours::lightslategrey);
+	juce::Line<float> line(juce::Point<float>(getLocalBounds().getWidth(), getLocalBounds().getHeight()), juce::Point<float>(0.0f, getLocalBounds().getHeight()));
+	g.drawLine(line, 15.0f);
 }
 
 void SpectrumAnalyzerComponent::resized()
