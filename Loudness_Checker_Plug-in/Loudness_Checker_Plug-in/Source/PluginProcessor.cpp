@@ -175,6 +175,7 @@ bool Loudness_Checker_PluginAudioProcessor::hasEditor() const
 juce::AudioProcessorEditor* Loudness_Checker_PluginAudioProcessor::createEditor()
 {
     return new Loudness_Checker_PluginAudioProcessorEditor (*this);
+	//return new juce::GenericAudioProcessorEditor(*this);
 }
 
 //==============================================================================

@@ -73,6 +73,8 @@ void Loudness_Checker_PluginAudioProcessorEditor::mouseDown(const juce::MouseEve
 {
 	isClicked = true;
 	repaint();
+	mySpectrAnComp.repaint();
+	mySpectrRep.repaint();
 }
 
 void Loudness_Checker_PluginAudioProcessorEditor::knobAttachment(int knobId)

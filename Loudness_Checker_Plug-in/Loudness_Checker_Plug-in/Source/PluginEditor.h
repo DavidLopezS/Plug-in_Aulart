@@ -38,9 +38,11 @@ private:
 
 	static constexpr auto numKnobs = 8;
 
-	juce::String myKnobName[numKnobs] = { "MINDBKNOWRMS", "MAXDBKNOBRMS", "SKEWEDPROPYRMS", "FFTDATAINDEXRMS", "LVLOFFSETRMS", "LVLKNOBSPECTR", "SKEWEDPROPYSPECTR", "LVLOFFSETSPECTR" };
-	/*juce::Label myKnobLabels[numKnobs] = { {"Min db RMS", "Min db RMS"}, {"Max db RMS", "Max db RMS"}, {"Skewed Proportion RMS", "Skewed Proportion RMS"}, {"Fft Data Index RMS", "Fft Data Index RMS"},
-								   {"Lvl Offset RMS", "Lvl Offset RMS"}, {"Lvl Knob Spectr", "Lvl Knob Spectr"}, {"Skewed Proportion Spectr", "Skewed Proportion Spectr"}, {"Lvl Offset Spectr", "Lvl Offset Spectr"} };*/
+	juce::String myKnobName[numKnobs] 
+	{ 
+		"MINDBKNOWRMS", "MAXDBKNOBRMS", "SKEWEDPROPYRMS", "FFTDATAINDEXRMS", 
+		"LVLOFFSETRMS", "LVLKNOBSPECTR", "SKEWEDPROPYSPECTR", "LVLOFFSETSPECTR" 
+	};
 
 	using Attachment = juce::AudioProcessorValueTreeState::SliderAttachment;
 	std::vector<std::unique_ptr<Attachment>> myAttachments;

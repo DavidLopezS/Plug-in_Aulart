@@ -49,6 +49,10 @@ private:
 	juce::dsp::FFT forwardFFT;
 	juce::dsp::WindowingFunction<float> window;
 
+	juce::Image background;
+	juce::Rectangle<int> getRenderArea();
+	juce::Rectangle<int> getAnalysisArea();
+
 	float fifo[fftSize];
 	int fifoIndex = 0;
 	float fftData[2 * fftSize];
