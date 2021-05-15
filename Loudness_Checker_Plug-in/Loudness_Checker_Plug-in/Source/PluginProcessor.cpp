@@ -93,8 +93,14 @@ void Loudness_Checker_PluginAudioProcessor::changeProgramName (int index, const 
 //==============================================================================
 void Loudness_Checker_PluginAudioProcessor::prepareToPlay (double sampleRate, int samplesPerBlock)
 {
-    // Use this method as the place to do any pre-playback
-    // initialisation that you need..
+	auto mySpectrData = dynamic_cast<Loudness_Checker_PluginAudioProcessorEditor*>(getActiveEditor());
+	if (mySpectrData != nullptr) 
+	{
+		mySpectrData->mySpectrAnComp.leftChannelFifo.prepare(samplesPerBlock);
+		mySpectrData->mySpectrAnComp.rightChannelFifo.prepare(samplesPerBlock);
+
+		mySpectrData->mySpectrAnComp.sampleRate = sampleRate;
+	}
 }
 
 void Loudness_Checker_PluginAudioProcessor::releaseResources()
@@ -152,14 +158,15 @@ void Loudness_Checker_PluginAudioProcessor::processBlock (juce::AudioBuffer<floa
 	auto mySpectrData = dynamic_cast<Loudness_Checker_PluginAudioProcessorEditor*>(getActiveEditor());
 	if (mySpectrData != nullptr)
 	{
-		mySpectrData->mySpectrAnComp.processAudioBlock(buffer);//RMS buffer input
+		mySpectrData->mySpectrAnComp.leftChannelFifo.update(buffer);//RMS buffer input
+		mySpectrData->mySpectrAnComp.rightChannelFifo.update(buffer);//RMS buffer input
 		mySpectrData->mySpectrRep.processAudioBlock(buffer);//Spectrogram buffer input
 	
-		mySpectrData->mySpectrAnComp.mindBValue = minRMSdB.load();
+		/*mySpectrData->mySpectrAnComp.mindBValue = minRMSdB.load();
 		mySpectrData->mySpectrAnComp.maxdBValue = maxRMSdB.load();
 		mySpectrData->mySpectrAnComp.skewedYKnobRMS = skPropRMS.load();
 		mySpectrData->mySpectrAnComp.dataIndexKnob = indexDataRMS.load();
-		mySpectrData->mySpectrAnComp.lvlOffsetRMS = lvlOffRMS.load();
+		mySpectrData->mySpectrAnComp.lvlOffsetRMS = lvlOffRMS.load();*/
 		mySpectrData->mySpectrRep.lvlKnobSpectr = lvlKnobSpectr.load();
 		mySpectrData->mySpectrRep.skewedPropSpectr = skPropSpectr.load();
 		mySpectrData->mySpectrRep.lvlOffsetSpectr = lvlOffSpectr.load();

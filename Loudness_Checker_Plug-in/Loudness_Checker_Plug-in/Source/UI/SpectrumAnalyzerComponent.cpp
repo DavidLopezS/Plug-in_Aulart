@@ -12,9 +12,13 @@
 #include "SpectrumAnalyzerComponent.h"
 
 //==============================================================================
-SpectrumAnalyzerComponent::SpectrumAnalyzerComponent() : forwardFFT(fftOrder), window(fftSize, juce::dsp::WindowingFunction<float>::hann), 
-							mindBValue(-100.0f), maxdBValue(0.0f), skewedYKnobRMS(0.3f), dataIndexKnob(0.5f), lvlOffsetRMS(1.0f)
+SpectrumAnalyzerComponent::SpectrumAnalyzerComponent() /*: forwardFFT(fftOrder), window(fftSize, juce::dsp::WindowingFunction<float>::hann), 
+							mindBValue(-100.0f), maxdBValue(0.0f), skewedYKnobRMS(0.3f), dataIndexKnob(0.5f), lvlOffsetRMS(1.0f)*/
 {
+	//48000 / 2048 = 23hz, a lot of resolution in the upper end, not a lot in the bottom
+	leftChannelFFTDataGenerator.changeOrder(FFTOrder::order2048);
+	monoBuffer.setSize(1, leftChannelFFTDataGenerator.getFFTSize());
+
 	setOpaque(true);
 	startTimerHz(30);//30
 }
@@ -22,17 +26,6 @@ SpectrumAnalyzerComponent::SpectrumAnalyzerComponent() : forwardFFT(fftOrder), w
 SpectrumAnalyzerComponent::~SpectrumAnalyzerComponent()
 {
 	stopTimer();
-}
-
-void SpectrumAnalyzerComponent::processAudioBlock(const juce::AudioBuffer<float>& buffer)
-{
-	if(buffer.getNumChannels() > 0)
-	{
-		const float* channelData = buffer.getReadPointer(0);
-
-		for (int sample = 0; sample < buffer.getNumSamples(); ++sample)
-			pushNextSampleIntoFifo(channelData[sample]);
-	}
 }
 
 void SpectrumAnalyzerComponent::paint (juce::Graphics& g)
@@ -45,7 +38,7 @@ void SpectrumAnalyzerComponent::paint (juce::Graphics& g)
 
 	g.setOpacity(1.0f);
 	g.setColour(juce::Colours::white);
-	drawFrame(g);
+	g.strokePath(leftChannelFFTPath, juce::PathStrokeType(1));
 
 	g.clipRegionIntersects(getLocalBounds());
 }
@@ -191,61 +184,44 @@ void SpectrumAnalyzerComponent::mouseDown(const juce::MouseEvent& e)
 
 void SpectrumAnalyzerComponent::timerCallback()
 {
-	if (nextFFTBlockReady)
-	{
-		drawNextFrameOfSpectrum();
-		nextFFTBlockReady = false;
-		repaint();
-	}
-}
+	juce::AudioBuffer<float> tempIncomingBuffer;
 
-void SpectrumAnalyzerComponent::pushNextSampleIntoFifo(float sample) noexcept
-{
-	if (fifoIndex == fftSize)
+	while(leftChannelFifo.getNumCompleteBuffersAvailable() > 0)
 	{
-		if (!nextFFTBlockReady)
+		if(leftChannelFifo.getAudioBuffer(tempIncomingBuffer))
 		{
-			juce::zeromem(fftData, sizeof(fftData));
-			memcpy(fftData, fifo, sizeof(fifo));
-			nextFFTBlockReady = true;
+			auto size = tempIncomingBuffer.getNumSamples();
+
+			juce::FloatVectorOperations::copy(monoBuffer.getWritePointer(0, 0), monoBuffer.getReadPointer(0, size), monoBuffer.getNumSamples() - size);
+
+			juce::FloatVectorOperations::copy(monoBuffer.getWritePointer(0, monoBuffer.getNumSamples() - size), tempIncomingBuffer.getReadPointer(0, 0), size);
+		
+			leftChannelFFTDataGenerator.produceFFTDataForRendering(monoBuffer, -48.0f);
 		}
-		fifoIndex = 0;
 	}
-	fifo[fifoIndex++] = sample;
-}
 
-void SpectrumAnalyzerComponent::drawNextFrameOfSpectrum()
-{
+	//if there are FFT Data buffers to pull, if we pull a buffer generate a path
+	const auto fftBounds = getAnalysisArea().toFloat();
+	const auto fftSize = leftChannelFFTDataGenerator.getFFTSize();
 
-	window.multiplyWithWindowingTable(fftData, fftSize);
+	//48000 / 2048 = 23hz <- bin width
+	const auto binWidth = sampleRate / (double)fftSize;
 
-	forwardFFT.performFrequencyOnlyForwardTransform(fftData);
-
-	auto mindB = mindBValue;//-100.0f
-	auto maxdB = maxdBValue;//0.0f
-
-	for (int i = 0; i < scopeSize; ++i)
+	while(leftChannelFFTDataGenerator.getNumAvailableFFTDataBlocks() > 0)
 	{
-		auto skewedProportionX = 1.0f - std::exp(std::log(1.0f - (float)i / (float)scopeSize) * skewedYKnobRMS);//0.2f
-		auto fftDataIndex = juce::jlimit(0, fftSize / 2, (int)(skewedProportionX * (float)fftSize * dataIndexKnob));//0.5f
-		auto level = juce::jmap(juce::jlimit(mindB, maxdB, juce::Decibels::gainToDecibels(fftData[fftDataIndex]) - juce::Decibels::gainToDecibels((float)fftSize)),
-			mindB, maxdB, 0.0f, lvlOffsetRMS);//1.0f
-
-		scopeData[i] = level;
+		std::vector<float> fftData;
+		if(leftChannelFFTDataGenerator.getFFTData(fftData))
+		{
+			pathProducer.generatePath(fftData, fftBounds, fftSize, binWidth, -48.0f);
+		}
 	}
 
-}
-
-void SpectrumAnalyzerComponent::drawFrame(juce::Graphics& g)
-{
-	for (int i = 1; i < scopeSize; ++i)
+	//while there are paths that can be pulled, pull as many as we can display most recent path
+	while(pathProducer.getNumPathsAvailable())
 	{
-		auto width = getLocalBounds().getWidth();
-		auto height = getLocalBounds().getHeight();
-
-		g.drawLine({ (float)juce::jmap(i - 1, 0, scopeSize - 1, 0, width),
-						   juce::jmap(scopeData[i - 1], 0.0f, 1.0f, (float)height, 0.0f),
-					(float)juce::jmap(i, 0, scopeSize - 1, 0, width),
-						   juce::jmap(scopeData[i], 0.0f, 1.0f, (float)height, 0.0f) });
+		pathProducer.getPath(leftChannelFFTPath);
 	}
+
+	repaint();
 }
+
