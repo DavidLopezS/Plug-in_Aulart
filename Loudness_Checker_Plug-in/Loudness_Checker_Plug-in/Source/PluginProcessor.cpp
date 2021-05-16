@@ -99,7 +99,7 @@ void Loudness_Checker_PluginAudioProcessor::prepareToPlay (double sampleRate, in
 		mySpectrData->mySpectrAnComp.leftChannelFifo.prepare(samplesPerBlock);
 		mySpectrData->mySpectrAnComp.rightChannelFifo.prepare(samplesPerBlock);
 
-		mySpectrData->mySpectrAnComp.sampleRate = sampleRate;
+		mySpectrData->mySpectrAnComp.sampleRate =	sampleRate;
 	}
 }
 
