@@ -24,7 +24,7 @@ Loudness_Checker_PluginAudioProcessorEditor::Loudness_Checker_PluginAudioProcess
 	addAndMakeVisible(&mySpectrAnComp);
 	addAndMakeVisible(&mySpectrRep);
 
-    setSize (700, 500); 
+    setSize (900, 500); 
 }
 
 Loudness_Checker_PluginAudioProcessorEditor::~Loudness_Checker_PluginAudioProcessorEditor()
@@ -61,7 +61,7 @@ void Loudness_Checker_PluginAudioProcessorEditor::resized()
 	using Track = juce::Grid::TrackInfo;
 	using Fr = juce::Grid::Fr;
 
-	grid.templateRows = { Track(Fr(1)), Track(Fr(1)) };
+	grid.templateRows = { Track(Fr(2)), Track(Fr(1)) };
 	grid.templateColumns = { Track(Fr(1)) };
 
 	grid.items = { juce::GridItem(mySpectrAnComp), juce::GridItem(mydBKnobs) };
