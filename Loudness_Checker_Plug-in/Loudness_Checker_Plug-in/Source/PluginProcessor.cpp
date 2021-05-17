@@ -161,12 +161,8 @@ void Loudness_Checker_PluginAudioProcessor::processBlock (juce::AudioBuffer<floa
 		mySpectrData->mySpectrAnComp.leftChannelFifo.update(buffer);//RMS buffer input
 		mySpectrData->mySpectrAnComp.rightChannelFifo.update(buffer);//RMS buffer input
 		mySpectrData->mySpectrRep.processAudioBlock(buffer);//Spectrogram buffer input
-	
-		/*mySpectrData->mySpectrAnComp.mindBValue = minRMSdB.load();
-		mySpectrData->mySpectrAnComp.maxdBValue = maxRMSdB.load();
-		mySpectrData->mySpectrAnComp.skewedYKnobRMS = skPropRMS.load();
-		mySpectrData->mySpectrAnComp.dataIndexKnob = indexDataRMS.load();
-		mySpectrData->mySpectrAnComp.lvlOffsetRMS = lvlOffRMS.load();*/
+		
+
 		mySpectrData->mySpectrRep.lvlKnobSpectr = lvlKnobSpectr.load();
 		mySpectrData->mySpectrRep.skewedPropSpectr = skPropSpectr.load();
 		mySpectrData->mySpectrRep.lvlOffsetSpectr = lvlOffSpectr.load();

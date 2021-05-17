@@ -41,6 +41,10 @@ public:
 
 private:
 
+	juce::Image background;
+	juce::Rectangle<int> getRenderArea();
+	juce::Rectangle<int> getAnalysisArea();
+
 	juce::dsp::FFT forwardFFT;
 	juce::Image spectrogramImage;
 

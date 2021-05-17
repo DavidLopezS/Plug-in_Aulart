@@ -28,27 +28,31 @@ void SpectrumAnalyzerComponent::paint (juce::Graphics& g)
 	g.fillAll(juce::Colours::black);
 
 	auto responseArea = getAnalysisArea();
-
-	g.drawImage(background, getLocalBounds().toFloat());
+	auto renderArea = getRenderArea();
 
 	g.setOpacity(1.0f);
 
+	g.drawImage(background, getLocalBounds().toFloat());
 
 	auto leftChannelFFTPath = leftPathProducer.getPath();
 	auto rightChannelFFTPath = rightPathProducer.getPath();
 
-	leftChannelFFTPath.applyTransform(juce::AffineTransform().translation(responseArea.getX(), responseArea.getY()));
-	rightChannelFFTPath.applyTransform(juce::AffineTransform().translation(responseArea.getX(), responseArea.getY()));
+	leftChannelFFTPath.applyTransform(juce::AffineTransform().translation(responseArea.getX(), renderArea.getY()));
+	rightChannelFFTPath.applyTransform(juce::AffineTransform().translation(responseArea.getX(), renderArea.getY()));
 
 	g.setColour(juce::Colours::white);
-	g.strokePath(leftChannelFFTPath, juce::PathStrokeType(1));
+	g.strokePath(leftChannelFFTPath, juce::PathStrokeType(1.0f));
 
 	g.setColour(juce::Colours::skyblue);
-	g.strokePath(rightChannelFFTPath, juce::PathStrokeType(1));
+	g.strokePath(rightChannelFFTPath, juce::PathStrokeType(1.0f));
 
+	g.setColour(juce::Colours::orange);
+	g.drawRoundedRectangle(responseArea.toFloat(), 4.0f, 1.0f);
 
-	g.clipRegionIntersects(getLocalBounds());
+	//g.clipRegionIntersects(getLocalBounds());
 }
+
+
 
 void SpectrumAnalyzerComponent::resized()
 {
@@ -166,7 +170,7 @@ juce::Rectangle<int> SpectrumAnalyzerComponent::getRenderArea()
 	auto area = getLocalBounds();
 
 	area.removeFromTop(11);
-	area.removeFromBottom(-16);
+	area.removeFromBottom(2);
 	area.removeFromRight(20);
 	area.removeFromLeft(20);
 
@@ -178,7 +182,7 @@ juce::Rectangle<int> SpectrumAnalyzerComponent::getAnalysisArea()
 	auto area = getRenderArea();
 
 	area.removeFromTop(4);
-	area.removeFromBottom(4);
+	area.removeFromBottom(4);//4
 
 	return area;
 }
@@ -192,38 +196,37 @@ void SpectrumAnalyzerComponent::mouseDown(const juce::MouseEvent& e)
 void PathProducer::process(juce::Rectangle<float> fftBounds, double sampleRate)
 {
 	juce::AudioBuffer<float> tempIncomingBuffer;
-
 	while (leftChannelFifo->getNumCompleteBuffersAvailable() > 0)
 	{
 		if (leftChannelFifo->getAudioBuffer(tempIncomingBuffer))
 		{
 			auto size = tempIncomingBuffer.getNumSamples();
 
-			juce::FloatVectorOperations::copy(monoBuffer.getWritePointer(0, 0), monoBuffer.getReadPointer(0, size), monoBuffer.getNumSamples() - size);
+			juce::FloatVectorOperations::copy(monoBuffer.getWritePointer(0, 0),
+				monoBuffer.getReadPointer(0, size),
+				monoBuffer.getNumSamples() - size);
 
-			juce::FloatVectorOperations::copy(monoBuffer.getWritePointer(0, monoBuffer.getNumSamples() - size), tempIncomingBuffer.getReadPointer(0, 0), size);
+			juce::FloatVectorOperations::copy(monoBuffer.getWritePointer(0, monoBuffer.getNumSamples() - size),
+				tempIncomingBuffer.getReadPointer(0, 0),
+				size);
 
-			leftChannelFFTDataGenerator.produceFFTDataForRendering(monoBuffer, -48.0f);
+			leftChannelFFTDataGenerator.produceFFTDataForRendering(monoBuffer, -48.f);
 		}
 	}
 
-	//if there are FFT Data buffers to pull, if we pull a buffer generate a path
 	const auto fftSize = leftChannelFFTDataGenerator.getFFTSize();
-
-	//48000 / 2048 = 23hz <- bin width
-	const auto binWidth = sampleRate / (double)fftSize;
+	const auto binWidth = sampleRate / double(fftSize);
 
 	while (leftChannelFFTDataGenerator.getNumAvailableFFTDataBlocks() > 0)
 	{
 		std::vector<float> fftData;
 		if (leftChannelFFTDataGenerator.getFFTData(fftData))
 		{
-			pathProducer.generatePath(fftData, fftBounds, fftSize, binWidth, -48.0f);
+			pathProducer.generatePath(fftData, fftBounds, fftSize, binWidth, -48.f);
 		}
 	}
 
-	//while there are paths that can be pulled, pull as many as we can display most recent path
-	while (pathProducer.getNumPathsAvailable())
+	while (pathProducer.getNumPathsAvailable() > 0)
 	{
 		pathProducer.getPath(leftChannelFFTPath);
 	}
@@ -231,7 +234,6 @@ void PathProducer::process(juce::Rectangle<float> fftBounds, double sampleRate)
 
 void SpectrumAnalyzerComponent::timerCallback()
 {
-
 	auto fftBounds = getAnalysisArea().toFloat();
 	
 	leftPathProducer.process(fftBounds, sampleRate);

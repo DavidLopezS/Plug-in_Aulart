@@ -16,6 +16,12 @@ Loudness_Checker_PluginAudioProcessorEditor::Loudness_Checker_PluginAudioProcess
 {
 	setOpaque(true);
 
+	juce::StringArray choices{ "RMS", "Spectrogram" };
+	spectrRMSSelector.addItemList(choices, 1);
+	addAndMakeVisible(spectrRMSSelector);
+
+	spectrRMSSelectorAttachment = std::make_unique<juce::AudioProcessorValueTreeState::ComboBoxAttachment>(audioProcessor.apvts, "GRAFTYPE", spectrRMSSelector);
+
 	addAndMakeVisible(&mydBKnobs);
 	
 	for(int i = 0; i < numKnobs; ++i)
@@ -61,10 +67,10 @@ void Loudness_Checker_PluginAudioProcessorEditor::resized()
 	using Track = juce::Grid::TrackInfo;
 	using Fr = juce::Grid::Fr;
 
-	grid.templateRows = { Track(Fr(2)), Track(Fr(1)) };
+	grid.templateRows = { Track(Fr(2)), Track(Fr(1)), Track(Fr(2))/*, Track(Fr(1)) */};
 	grid.templateColumns = { Track(Fr(1)) };
 
-	grid.items = { juce::GridItem(mySpectrAnComp), juce::GridItem(mydBKnobs) };
+	grid.items = { juce::GridItem(mySpectrAnComp), juce::GridItem(spectrRMSSelector), juce::GridItem(mySpectrRep), juce::GridItem(mydBKnobs) };
 
 	grid.performLayout(getLocalBounds());
 }

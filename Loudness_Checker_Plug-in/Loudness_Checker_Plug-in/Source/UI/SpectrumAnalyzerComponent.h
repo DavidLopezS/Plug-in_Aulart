@@ -230,7 +230,6 @@ private:
 	Fifo<BlockType> fftDataFifo;
 };
 
-
 template<typename PathType>
 struct AnalyzerPathGenerator
 {
@@ -338,6 +337,7 @@ public:
 	void resized() override;
 	void mouseDown(const juce::MouseEvent&) override;
 	void timerCallback() override;
+	void repSwitch (const int);
 
 
 	using BlockType = juce::AudioBuffer<float>;
@@ -355,6 +355,8 @@ private:
 	PathProducer leftPathProducer, rightPathProducer;
 
 	bool clicked = false;
+	bool isRMS = false;
+	bool isSpectr = false;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (SpectrumAnalyzerComponent)
 };

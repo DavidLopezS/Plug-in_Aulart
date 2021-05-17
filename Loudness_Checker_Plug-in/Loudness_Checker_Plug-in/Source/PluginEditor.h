@@ -36,6 +36,11 @@ private:
 	
 	bool isClicked = false;
 
+	//Graf selector attachment
+	juce::ComboBox spectrRMSSelector;
+	std::unique_ptr<juce::AudioProcessorValueTreeState::ComboBoxAttachment> spectrRMSSelectorAttachment;
+
+	//Knobs attachments
 	static constexpr auto numKnobs = 8;
 
 	juce::String myKnobName[numKnobs] 
