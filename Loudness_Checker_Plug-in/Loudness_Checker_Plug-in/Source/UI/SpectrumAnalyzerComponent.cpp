@@ -37,8 +37,8 @@ void SpectrumAnalyzerComponent::paint (juce::Graphics& g)
 	auto leftChannelFFTPath = leftPathProducer.getPath();
 	auto rightChannelFFTPath = rightPathProducer.getPath();
 
-	leftChannelFFTPath.applyTransform(juce::AffineTransform().translation(responseArea.getX(), 0.0f));
-	rightChannelFFTPath.applyTransform(juce::AffineTransform().translation(responseArea.getX(), 0.0f));
+	leftChannelFFTPath.applyTransform(juce::AffineTransform().translation(responseArea.getX(), -10.0f));
+	rightChannelFFTPath.applyTransform(juce::AffineTransform().translation(responseArea.getX(), -10.0f));
 
 	g.setColour(juce::Colours::white);
 	g.strokePath(leftChannelFFTPath, juce::PathStrokeType(1.0f));
@@ -169,8 +169,8 @@ juce::Rectangle<int> SpectrumAnalyzerComponent::getRenderArea()
 {
 	auto area = getLocalBounds();
 
-	area.removeFromTop(11);
-	area.removeFromBottom(2);
+	area.removeFromTop(15);
+	area.removeFromBottom(0);
 	area.removeFromRight(20);
 	area.removeFromLeft(20);
 
@@ -181,8 +181,8 @@ juce::Rectangle<int> SpectrumAnalyzerComponent::getAnalysisArea()
 {
 	auto bounds = getRenderArea();
 
-	bounds.removeFromTop(4);
-	bounds.removeFromBottom(4);
+	bounds.removeFromTop(0);
+	bounds.removeFromBottom(2);
 
 	return bounds;
 }
