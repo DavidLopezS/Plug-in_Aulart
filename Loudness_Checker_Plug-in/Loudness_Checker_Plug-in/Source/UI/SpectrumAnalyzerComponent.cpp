@@ -37,8 +37,8 @@ void SpectrumAnalyzerComponent::paint (juce::Graphics& g)
 	auto leftChannelFFTPath = leftPathProducer.getPath();
 	auto rightChannelFFTPath = rightPathProducer.getPath();
 
-	leftChannelFFTPath.applyTransform(juce::AffineTransform().translation(responseArea.getX(), renderArea.getY()));
-	rightChannelFFTPath.applyTransform(juce::AffineTransform().translation(responseArea.getX(), renderArea.getY()));
+	leftChannelFFTPath.applyTransform(juce::AffineTransform().translation(responseArea.getX(), 0.0f));
+	rightChannelFFTPath.applyTransform(juce::AffineTransform().translation(responseArea.getX(), 0.0f));
 
 	g.setColour(juce::Colours::white);
 	g.strokePath(leftChannelFFTPath, juce::PathStrokeType(1.0f));
@@ -49,7 +49,7 @@ void SpectrumAnalyzerComponent::paint (juce::Graphics& g)
 	g.setColour(juce::Colours::orange);
 	g.drawRoundedRectangle(responseArea.toFloat(), 4.0f, 1.0f);
 
-	//g.clipRegionIntersects(getLocalBounds());
+	g.clipRegionIntersects(getLocalBounds());
 }
 
 
@@ -179,12 +179,12 @@ juce::Rectangle<int> SpectrumAnalyzerComponent::getRenderArea()
 
 juce::Rectangle<int> SpectrumAnalyzerComponent::getAnalysisArea()
 {
-	auto area = getRenderArea();
+	auto bounds = getRenderArea();
 
-	area.removeFromTop(4);
-	area.removeFromBottom(4);//4
+	bounds.removeFromTop(4);
+	bounds.removeFromBottom(4);
 
-	return area;
+	return bounds;
 }
 
 void SpectrumAnalyzerComponent::mouseDown(const juce::MouseEvent& e)

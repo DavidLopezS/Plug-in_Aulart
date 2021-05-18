@@ -237,10 +237,7 @@ struct AnalyzerPathGenerator
 	 converts 'renderData[]' into a juce::Path
 	 */
 	void generatePath(const std::vector<float>& renderData,
-		juce::Rectangle<float> fftBounds,
-		int fftSize,
-		float binWidth,
-		float negativeInfinity)
+		juce::Rectangle<float> fftBounds, int fftSize, float binWidth, float negativeInfinity)
 	{
 		auto top = fftBounds.getY();
 		auto bottom = fftBounds.getHeight();
