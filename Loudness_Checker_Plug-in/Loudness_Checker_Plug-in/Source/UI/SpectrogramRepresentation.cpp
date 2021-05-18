@@ -64,15 +64,6 @@ void SpectrogramRepresentation::resized()
 	auto bottom = renderArea.getHeight();
 	auto width = renderArea.getWidth();
 
-	juce::Array<float> yPos;
-	for (auto f : freq)
-	{
-		auto y = juce::jmap(f, 20.0f, 20000.0f, float(bottom), float(top));
-		g.drawHorizontalLine(y, left, right);
-	}
-
-
-
 	//Values representation
 	g.setColour(juce::Colours::lightgrey);
 	const int fontHeight = 10;

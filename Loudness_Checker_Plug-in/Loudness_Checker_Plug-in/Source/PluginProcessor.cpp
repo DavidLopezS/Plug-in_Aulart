@@ -99,7 +99,7 @@ void Loudness_Checker_PluginAudioProcessor::prepareToPlay (double sampleRate, in
 		mySpectrData->mySpectrAnComp.leftChannelFifo.prepare(samplesPerBlock);
 		mySpectrData->mySpectrAnComp.rightChannelFifo.prepare(samplesPerBlock);
 
-		mySpectrData->mySpectrAnComp.sampleRate =	sampleRate;
+		//mySpectrData->mySpectrAnComp.sampleRate =	sampleRate;
 	}
 }
 
@@ -162,6 +162,7 @@ void Loudness_Checker_PluginAudioProcessor::processBlock (juce::AudioBuffer<floa
 		mySpectrData->mySpectrAnComp.rightChannelFifo.update(buffer);//RMS buffer input
 		mySpectrData->mySpectrRep.processAudioBlock(buffer);//Spectrogram buffer input
 		
+		mySpectrData->mySpectrAnComp.sampleRate = this->getSampleRate();
 
 		mySpectrData->mySpectrRep.lvlKnobSpectr = lvlKnobSpectr.load();
 		mySpectrData->mySpectrRep.skewedPropSpectr = skPropSpectr.load();
