@@ -12,7 +12,8 @@
 #include "SpectrumAnalyzerComponent.h"
 
 //==============================================================================
-SpectrumAnalyzerComponent::SpectrumAnalyzerComponent() : leftPathProducer(leftChannelFifo), rightPathProducer(rightChannelFifo)
+SpectrumAnalyzerComponent::SpectrumAnalyzerComponent() : leftPathProducer(leftChannelFifo), rightPathProducer(rightChannelFifo),
+														 forwardFFT(fftOrder), spectrogramImage(juce::Image::RGB, 512, 512, true)
 {
 	setOpaque(true);
 	startTimerHz(30);//30
@@ -21,6 +22,16 @@ SpectrumAnalyzerComponent::SpectrumAnalyzerComponent() : leftPathProducer(leftCh
 SpectrumAnalyzerComponent::~SpectrumAnalyzerComponent()
 {
 	stopTimer();
+}
+
+void SpectrumAnalyzerComponent::processAudioBlock(const juce::AudioBuffer<float>& buffer)
+{
+	if (buffer.getNumChannels() > 0)
+	{
+		const float* channelData = buffer.getReadPointer(0);
+		for (int sample = 0; sample < buffer.getNumSamples(); ++sample)
+			pushNextSampleIntoFifo(channelData[sample]);
+	}
 }
 
 void SpectrumAnalyzerComponent::paint (juce::Graphics& g)
@@ -34,7 +45,8 @@ void SpectrumAnalyzerComponent::paint (juce::Graphics& g)
 
 	if (isRMS)
 	{
-		g.drawImage(background, getLocalBounds().toFloat());
+		repaint();
+		g.drawImage(backgroundRMS, getLocalBounds().toFloat());
 
 		auto leftChannelFFTPath = leftPathProducer.getPath();
 		auto rightChannelFFTPath = rightPathProducer.getPath();
@@ -55,8 +67,8 @@ void SpectrumAnalyzerComponent::paint (juce::Graphics& g)
 	}
 	else
 	{
-		g.setColour(juce::Colours::white);
-		g.drawText("Spectrum", responseArea.toFloat(), juce::Justification::centred);
+		repaint();
+		g.drawImage(spectrogramImage, getAnalysisArea().toFloat());
 	}
 }
 
@@ -64,9 +76,9 @@ void SpectrumAnalyzerComponent::paint (juce::Graphics& g)
 
 void SpectrumAnalyzerComponent::resized()
 {
-	background = juce::Image(juce::Image::PixelFormat::RGB, getWidth(), getHeight(), true);
+	backgroundRMS = juce::Image(juce::Image::PixelFormat::RGB, getWidth(), getHeight(), true);
 
-	juce::Graphics g(background);
+	juce::Graphics g(backgroundRMS);
 
 	juce::Array<float> freq
 	{
@@ -192,11 +204,14 @@ void SpectrumAnalyzerComponent::selGrid(const int choice)
 juce::Rectangle<int> SpectrumAnalyzerComponent::getRenderArea()
 {
 	auto area = getLocalBounds();
-
-	area.removeFromTop(15);
-	area.removeFromBottom(0);
-	area.removeFromRight(20);
-	area.removeFromLeft(20);
+	
+	if (isRMS)
+	{
+		area.removeFromTop(15);
+		area.removeFromBottom(0);
+		area.removeFromRight(20);
+		area.removeFromLeft(20);
+	}
 
 	return area;
 }
@@ -204,9 +219,12 @@ juce::Rectangle<int> SpectrumAnalyzerComponent::getRenderArea()
 juce::Rectangle<int> SpectrumAnalyzerComponent::getAnalysisArea()
 {
 	auto bounds = getRenderArea();
-
-	bounds.removeFromTop(0);
-	bounds.removeFromBottom(2);
+	
+	if (isRMS)
+	{
+		bounds.removeFromTop(0);
+		bounds.removeFromBottom(2);
+	}
 
 	return bounds;
 }
@@ -258,11 +276,62 @@ void PathProducer::process(juce::Rectangle<float> fftBounds, double sampleRate)
 
 void SpectrumAnalyzerComponent::timerCallback()
 {
-	auto fftBounds = getAnalysisArea().toFloat();
-	
-	leftPathProducer.process(fftBounds, sampleRate);
-	rightPathProducer.process(fftBounds, sampleRate);
+	if (isRMS)
+	{
+		auto fftBounds = getAnalysisArea().toFloat();
 
-	repaint();
+		leftPathProducer.process(fftBounds, sampleRate);
+		rightPathProducer.process(fftBounds, sampleRate);
+
+		repaint();
+	}
+	else
+	{
+		if (nextFFTBlockReady)
+		{
+			drawNextLineOfSpectrogram();
+			nextFFTBlockReady = false;
+			repaint();
+		}
+	}
+}
+
+void SpectrumAnalyzerComponent::pushNextSampleIntoFifo(float sample) noexcept
+{
+	if (fifoIndex == fftSize)
+	{
+		if (!nextFFTBlockReady)
+		{
+			juce::zeromem(fftData, sizeof(fftData));
+			memcpy(fftData, fifo, sizeof(fifo));
+			nextFFTBlockReady = true;
+		}
+		fifoIndex = 0;
+	}
+	fifo[fifoIndex++] = sample;
+}
+
+void SpectrumAnalyzerComponent::drawNextLineOfSpectrogram()
+{
+	const int rightHandEdge = spectrogramImage.getWidth() - 1;
+	const int imageHeight = spectrogramImage.getHeight();
+
+	spectrogramImage.moveImageSection(0, 0, 1, 0, rightHandEdge, imageHeight);
+
+	forwardFFT.performFrequencyOnlyForwardTransform(fftData);
+
+	juce::Range<float> maxLevel = juce::FloatVectorOperations::findMinAndMax(fftData, fftSize / 2);
+	if (maxLevel.getEnd() == 0.0f)
+		maxLevel.setEnd(4.1f);//0.00001
+
+	for (int i = 1; i < imageHeight; ++i)
+	{
+		const float skewedProportionY = 1.0f - std::exp(std::log(i / (float)imageHeight) * 0.4f);//0.2f
+		const int fftDataIndex = juce::jlimit(0, fftSize / 2, (int)(skewedProportionY * fftSize / 2));
+		const float level = juce::jmap(fftData[fftDataIndex], 0.0f, maxLevel.getEnd(), 0.0f, 3.9f);//Original targetRangeMax = 1.0f, needs to be tweaked/tested
+
+		spectrogramImage.setPixelAt(rightHandEdge, i, juce::Colour::fromHSL(level, 1.0f, level, 1.0f));//Colour::fromHSV
+	}
+
 }
 

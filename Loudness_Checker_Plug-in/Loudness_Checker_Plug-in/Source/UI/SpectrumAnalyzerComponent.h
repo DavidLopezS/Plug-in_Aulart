@@ -329,12 +329,15 @@ class SpectrumAnalyzerComponent  : public juce::Component, private juce::Timer
 public:
     SpectrumAnalyzerComponent();
     ~SpectrumAnalyzerComponent() override;
-
+	
+	void processAudioBlock(const juce::AudioBuffer<float>&);
     void paint (juce::Graphics&) override;
 	void resized() override;
 	void mouseDown(const juce::MouseEvent&) override;
 	void timerCallback() override;
 	void selGrid (const int);
+	void pushNextSampleIntoFifo(float) noexcept;
+	void drawNextLineOfSpectrogram();
 
 
 	using BlockType = juce::AudioBuffer<float>;
@@ -343,13 +346,27 @@ public:
 
 	double sampleRate;
 
+	enum
+	{
+		fftOrder = 11,//10
+		fftSize = 1 << fftOrder //adds the ordet 10 into the binary number, so 10 extra zeros (00010000000000 = 1024)
+	};
+
 private:
 
-	juce::Image background;
+	juce::Image backgroundRMS;
 	juce::Rectangle<int> getRenderArea();
 	juce::Rectangle<int> getAnalysisArea();
 
 	PathProducer leftPathProducer, rightPathProducer;
+
+	juce::dsp::FFT forwardFFT;
+	juce::Image spectrogramImage;
+
+	float fifo[fftSize];
+	int fifoIndex = 0;
+	float fftData[2 * fftSize];
+	bool nextFFTBlockReady = false;
 
 	bool clicked = false;
 	bool isRMS = false;
