@@ -331,24 +331,24 @@ void PathProducer::process(juce::Rectangle<float> fftBounds, double sampleRate)
 
 void SpectrumAnalyzerComponent::timerCallback()
 {
-	if (isRMS)
-	{
+	//if (isRMS)
+	//{
 		auto fftBounds = getAnalysisArea().toFloat();
 
 		leftPathProducer.process(fftBounds, sampleRate);
 		rightPathProducer.process(fftBounds, sampleRate);
 
 		repaint();
-	}
-	else
-	{
+	//}
+	//else
+	//{
 		if (nextFFTBlockReady)
 		{
 			drawNextLineOfSpectrogram();
 			nextFFTBlockReady = false;
 			repaint();
 		}
-	}
+	/*}*/
 }
 
 void SpectrumAnalyzerComponent::pushNextSampleIntoFifo(float sample) noexcept
@@ -377,13 +377,13 @@ void SpectrumAnalyzerComponent::drawNextLineOfSpectrogram()
 
 	juce::Range<float> maxLevel = juce::FloatVectorOperations::findMinAndMax(fftData, fftSize / 2);
 	if (maxLevel.getEnd() == 0.0f)
-		maxLevel.setEnd(4.1f);//0.00001
+		maxLevel.setEnd(0.00001f);//4.1f
 
 	for (int i = 1; i < imageHeight; ++i)
 	{
-		const float skewedProportionY = 1.0f - std::exp(std::log(i / (float)imageHeight) * 0.4f);//0.2f
+		const float skewedProportionY = 1.0f - std::exp(std::log(i / (float)imageHeight) * 0.2f);//0.4f
 		const int fftDataIndex = juce::jlimit(0, fftSize / 2, (int)(skewedProportionY * fftSize / 2));
-		const float level = juce::jmap(fftData[fftDataIndex], 0.0f, maxLevel.getEnd(), 0.0f, 3.9f);//Original targetRangeMax = 1.0f, needs to be tweaked/tested
+		const float level = juce::jmap(fftData[fftDataIndex], 0.0f, maxLevel.getEnd(), 0.0f, 1.0f);//Original targetRangeMax = 3.9f, needs to be tweaked/tested
 
 		spectrogramImage.setPixelAt(rightHandEdge, i, juce::Colour::fromHSL(level, 1.0f, level, 1.0f));//Colour::fromHSV
 	}
