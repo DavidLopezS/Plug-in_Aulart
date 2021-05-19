@@ -212,21 +212,32 @@ juce::Rectangle<int> SpectrumAnalyzerComponent::getRenderArea()
 		area.removeFromRight(20);
 		area.removeFromLeft(20);
 	}
+	else
+	{
+		area.removeFromTop(0);
+		area.removeFromBottom(-3);
+		area.removeFromRight(31);
+		area.removeFromLeft(0);
+	}
 
 	return area;
 }
 
 juce::Rectangle<int> SpectrumAnalyzerComponent::getAnalysisArea()
 {
-	auto bounds = getRenderArea();
+	auto area = getRenderArea();
 	
 	if (isRMS)
 	{
-		bounds.removeFromTop(0);
-		bounds.removeFromBottom(2);
+		area.removeFromTop(0);
+		area.removeFromBottom(2);
 	}
-
-	return bounds;
+	else
+	{
+		area.removeFromTop(4);
+		area.removeFromBottom(4);//4
+	}
+	return area;
 }
 
 void SpectrumAnalyzerComponent::mouseDown(const juce::MouseEvent& e)
