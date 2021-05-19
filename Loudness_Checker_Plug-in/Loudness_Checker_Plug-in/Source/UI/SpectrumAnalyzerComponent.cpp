@@ -32,24 +32,32 @@ void SpectrumAnalyzerComponent::paint (juce::Graphics& g)
 
 	g.setOpacity(1.0f);
 
-	g.drawImage(background, getLocalBounds().toFloat());
+	if (isRMS)
+	{
+		g.drawImage(background, getLocalBounds().toFloat());
 
-	auto leftChannelFFTPath = leftPathProducer.getPath();
-	auto rightChannelFFTPath = rightPathProducer.getPath();
+		auto leftChannelFFTPath = leftPathProducer.getPath();
+		auto rightChannelFFTPath = rightPathProducer.getPath();
 
-	leftChannelFFTPath.applyTransform(juce::AffineTransform().translation(responseArea.getX(), -10.0f));
-	rightChannelFFTPath.applyTransform(juce::AffineTransform().translation(responseArea.getX(), -10.0f));
+		leftChannelFFTPath.applyTransform(juce::AffineTransform().translation(responseArea.getX(), -10.0f));
+		rightChannelFFTPath.applyTransform(juce::AffineTransform().translation(responseArea.getX(), -10.0f));
 
-	g.setColour(juce::Colours::white);
-	g.strokePath(leftChannelFFTPath, juce::PathStrokeType(1.0f));
+		g.setColour(juce::Colours::white);
+		g.strokePath(leftChannelFFTPath, juce::PathStrokeType(1.0f));
 
-	g.setColour(juce::Colours::skyblue);
-	g.strokePath(rightChannelFFTPath, juce::PathStrokeType(1.0f));
+		g.setColour(juce::Colours::skyblue);
+		g.strokePath(rightChannelFFTPath, juce::PathStrokeType(1.0f));
 
-	g.setColour(juce::Colours::orange);
-	g.drawRoundedRectangle(responseArea.toFloat(), 4.0f, 1.0f);
+		g.setColour(juce::Colours::orange);
+		g.drawRoundedRectangle(responseArea.toFloat(), 4.0f, 1.0f);
 
-	g.clipRegionIntersects(getLocalBounds());
+		g.clipRegionIntersects(getLocalBounds());
+	}
+	else
+	{
+		g.setColour(juce::Colours::white);
+		g.drawText("Spectrum", responseArea.toFloat(), juce::Justification::centred);
+	}
 }
 
 
@@ -163,6 +171,22 @@ void SpectrumAnalyzerComponent::resized()
 		g.drawFittedText(str, r, juce::Justification::centred, 1);
 	}
 
+}
+
+void SpectrumAnalyzerComponent::selGrid(const int choice)
+{
+	switch(choice)
+	{
+	case 0:
+		isRMS = true;
+		break;
+	case 1:
+		isRMS = false;
+		break;
+	default:
+		jassertfalse;
+		break;
+	}
 }
 
 juce::Rectangle<int> SpectrumAnalyzerComponent::getRenderArea()

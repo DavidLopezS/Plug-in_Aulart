@@ -334,7 +334,7 @@ public:
 	void resized() override;
 	void mouseDown(const juce::MouseEvent&) override;
 	void timerCallback() override;
-	void repSwitch (const int);
+	void selGrid (const int);
 
 
 	using BlockType = juce::AudioBuffer<float>;
@@ -353,7 +353,6 @@ private:
 
 	bool clicked = false;
 	bool isRMS = false;
-	bool isSpectr = false;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (SpectrumAnalyzerComponent)
 };
