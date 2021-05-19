@@ -45,7 +45,6 @@ void SpectrumAnalyzerComponent::paint (juce::Graphics& g)
 
 	if (isRMS)
 	{
-		repaint();
 		g.drawImage(backgroundRMS, getLocalBounds().toFloat());
 
 		auto leftChannelFFTPath = leftPathProducer.getPath();
@@ -67,7 +66,7 @@ void SpectrumAnalyzerComponent::paint (juce::Graphics& g)
 	}
 	else
 	{
-		repaint();
+		g.drawImage(backgroundSpectr, getLocalBounds().toFloat());
 		g.drawImage(spectrogramImage, getAnalysisArea().toFloat());
 	}
 }
@@ -77,15 +76,11 @@ void SpectrumAnalyzerComponent::paint (juce::Graphics& g)
 void SpectrumAnalyzerComponent::resized()
 {
 	backgroundRMS = juce::Image(juce::Image::PixelFormat::RGB, getWidth(), getHeight(), true);
+	backgroundSpectr = juce::Image(juce::Image::PixelFormat::RGB, getWidth(), getHeight(), true);
 
-	juce::Graphics g(backgroundRMS);
 
-	juce::Array<float> freq
-	{
-		20, 50, 100,
-		200, 500, 1000,
-		2000, 5000, 10000, 20000
-	};
+	juce::Graphics gRMS(backgroundRMS);
+	juce::Graphics gSpectr(backgroundSpectr);
 
 	auto renderArea = getAnalysisArea();
 	auto left = renderArea.getX();
@@ -94,18 +89,26 @@ void SpectrumAnalyzerComponent::resized()
 	auto bottom = renderArea.getHeight();
 	auto width = renderArea.getWidth();
 
+	//RMS grid
+	juce::Array<float> freqRMS
+	{
+		20, 50, 100,
+		200, 500, 1000,
+		2000, 5000, 10000, 20000
+	};
+
 	//lines representation
 	juce::Array<float> xPos;
-	for(auto f : freq)
+	for(auto f : freqRMS)
 	{
 		auto normX = juce::mapFromLog10(f, 20.0f, 20000.0f);
 		xPos.add(left + width * normX);
 	}
 
-	g.setColour(juce::Colours::dimgrey);
+	gRMS.setColour(juce::Colours::dimgrey);
 	for(auto x : xPos)
 	{
-		g.drawVerticalLine(x, top, bottom);
+		gRMS.drawVerticalLine(x, top, bottom);
 	}
 
 	juce::Array<float> gain
@@ -116,18 +119,18 @@ void SpectrumAnalyzerComponent::resized()
 	for(auto gDb : gain)
 	{
 		auto y = juce::jmap(gDb, -24.0f, 24.0f, float(bottom), float(top));
-		g.setColour(gDb == 0.0f ? juce::Colour(0u, 172u, 1u) : juce::Colours::darkgrey);
-		g.drawHorizontalLine(y, left, right); 
+		gRMS.setColour(gDb == 0.0f ? juce::Colour(0u, 172u, 1u) : juce::Colours::darkgrey);
+		gRMS.drawHorizontalLine(y, left, right); 
 	}
 
 	//Values representation
-	g.setColour(juce::Colours::lightgrey);
-	const int fontHeight = 10;
-	g.setFont(fontHeight);
+	gRMS.setColour(juce::Colours::lightgrey);
+	const int fontHeightRMS = 10;
+	gRMS.setFont(fontHeightRMS);
 
-	for(int i = 0; i < freq.size(); ++i)
+	for(int i = 0; i < freqRMS.size(); ++i)
 	{
-		auto f = freq[i];
+		auto f = freqRMS[i];
 		auto x = xPos[i];
 
 		bool addK = false;
@@ -143,14 +146,14 @@ void SpectrumAnalyzerComponent::resized()
 			str << "k";
 		str << "Hz";
 
-		auto textWidth = g.getCurrentFont().getStringWidth(str);
+		auto textWidth = gRMS.getCurrentFont().getStringWidth(str);
 
 		juce::Rectangle<int> r;
-		r.setSize(textWidth, fontHeight);
+		r.setSize(textWidth, fontHeightRMS);
 		r.setCentre(x, 0);
 		r.setY(1);
 
-		g.drawFittedText(str, r, juce::Justification::centred, 1);
+		gRMS.drawFittedText(str, r, juce::Justification::centred, 1);
 	}
 
 	for(auto gDb : gain)
@@ -162,27 +165,68 @@ void SpectrumAnalyzerComponent::resized()
 			str << "+";
 		str << gDb;
 
-		auto textWidth = g.getCurrentFont().getStringWidth(str);
+		auto textWidth = gRMS.getCurrentFont().getStringWidth(str);
+
+		juce::Rectangle<int> r;
+		r.setSize(textWidth, fontHeightRMS);
+		r.setX(getWidth() - textWidth);
+		r.setCentre(r.getCentreX(), y);
+
+		gRMS.setColour(gDb == 0.0f ? juce::Colour(0u, 172u, 1u) : juce::Colours::lightgrey);
+
+		gRMS.drawFittedText(str, r, juce::Justification::centred, 1);
+
+		str.clear();
+		str << (gDb - 24.0f);
+
+		r.setX(1);
+		textWidth = gRMS.getCurrentFont().getStringWidth(str);
+		r.setSize(textWidth, fontHeightRMS);
+
+		gRMS.drawFittedText(str, r, juce::Justification::centred, 1);
+	}
+	
+	//Spectr Grid
+	juce::Array<float> freqSpectr
+	{
+		20, 5000, 10000, 15000, 20000
+	};
+
+	//Values representation
+	gSpectr.setColour(juce::Colours::lightgrey);
+	const int fontHeight = 10;
+	gSpectr.setFont(fontHeight);
+
+
+	for (auto f : freqSpectr)
+	{
+		auto y = juce::jmap(f, 20.0f, 20000.0f, float(bottom), float(top));
+
+		bool addK = false;
+		juce::String str;
+		if (f > 999.0f)
+		{
+			addK = true;
+			f /= 1000.0f;
+		}
+
+		str << f;
+		if (addK)
+			str << "k";
+		str << "Hz";
+
+		auto textWidth = gSpectr.getCurrentFont().getStringWidth(str);
 
 		juce::Rectangle<int> r;
 		r.setSize(textWidth, fontHeight);
 		r.setX(getWidth() - textWidth);
 		r.setCentre(r.getCentreX(), y);
 
-		g.setColour(gDb == 0.0f ? juce::Colour(0u, 172u, 1u) : juce::Colours::lightgrey);
+		gSpectr.setColour(f == 0.0f ? juce::Colour(0u, 172u, 1u) : juce::Colours::lightgrey);
 
-		g.drawFittedText(str, r, juce::Justification::centred, 1);
+		gSpectr.drawFittedText(str, r, juce::Justification::centred, 1);
 
-		str.clear();
-		str << (gDb - 24.0f);
-
-		r.setX(1);
-		textWidth = g.getCurrentFont().getStringWidth(str);
-		r.setSize(textWidth, fontHeight);
-
-		g.drawFittedText(str, r, juce::Justification::centred, 1);
 	}
-
 }
 
 void SpectrumAnalyzerComponent::selGrid(const int choice)

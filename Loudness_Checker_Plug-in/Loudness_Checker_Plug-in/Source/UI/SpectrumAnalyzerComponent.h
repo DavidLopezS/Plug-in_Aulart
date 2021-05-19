@@ -354,7 +354,7 @@ public:
 
 private:
 
-	juce::Image backgroundRMS;
+	juce::Image backgroundRMS, backgroundSpectr;
 	juce::Rectangle<int> getRenderArea();
 	juce::Rectangle<int> getAnalysisArea();
 

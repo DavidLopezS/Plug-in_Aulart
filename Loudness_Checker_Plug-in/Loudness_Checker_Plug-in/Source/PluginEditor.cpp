@@ -67,10 +67,10 @@ void Loudness_Checker_PluginAudioProcessorEditor::resized()
 	using Track = juce::Grid::TrackInfo;
 	using Fr = juce::Grid::Fr;
 
-	grid.templateRows = { Track(Fr(2)), Track(Fr(1)), Track(Fr(2))/*, Track(Fr(1)) */};
+	grid.templateRows = { Track(Fr(2)), Track(Fr(1))/*, Track(Fr(2)), Track(Fr(1)) */};
 	grid.templateColumns = { Track(Fr(1)) };
 
-	grid.items = { juce::GridItem(mySpectrAnComp), juce::GridItem(spectrRMSSelector), juce::GridItem(mySpectrRep), juce::GridItem(mydBKnobs) };
+	grid.items = { juce::GridItem(mySpectrAnComp), juce::GridItem(spectrRMSSelector)/*, juce::GridItem(mySpectrRep), juce::GridItem(mydBKnobs)*/ };
 
 	grid.performLayout(getLocalBounds());
 }

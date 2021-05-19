@@ -160,8 +160,8 @@ void Loudness_Checker_PluginAudioProcessor::processBlock (juce::AudioBuffer<floa
 	{
 		//mySpectrData->mySpectrAnComp.leftChannelFifo.update(buffer);//RMS buffer input
 		//mySpectrData->mySpectrAnComp.rightChannelFifo.update(buffer);//RMS buffer input
-		mySpectrData->mySpectrAnComp.processAudioBlock(buffer);
-		mySpectrData->mySpectrRep.processAudioBlock(buffer);//Spectrogram buffer input
+		mySpectrData->mySpectrAnComp.processAudioBlock(buffer);//Spectrogram buffer input
+		//mySpectrData->mySpectrRep.processAudioBlock(buffer);//Spectrogram buffer input
 		
 		mySpectrData->mySpectrAnComp.sampleRate = this->getSampleRate();
 		mySpectrData->mySpectrAnComp.selGrid(graftOutputType);
