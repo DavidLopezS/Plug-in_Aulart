@@ -355,8 +355,10 @@ public:
 private:
 
 	juce::Image backgroundRMS, backgroundSpectr;
-	juce::Rectangle<int> getRenderArea();
-	juce::Rectangle<int> getAnalysisArea();
+	juce::Rectangle<int> getRenderAreaRMS();
+	juce::Rectangle<int> getAnalysisAreaRMS();
+	juce::Rectangle<int> getRenderAreaSpectr();
+	juce::Rectangle<int> getAnalysisAreaSpectr();
 
 	PathProducer leftPathProducer, rightPathProducer;
 

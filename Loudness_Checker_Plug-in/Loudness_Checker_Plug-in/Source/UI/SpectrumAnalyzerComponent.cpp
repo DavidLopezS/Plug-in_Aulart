@@ -38,8 +38,11 @@ void SpectrumAnalyzerComponent::paint (juce::Graphics& g)
 {
 	g.fillAll(juce::Colours::black);
 
-	auto responseArea = getAnalysisArea();
-	auto renderArea = getRenderArea();
+	auto responseAreaRMS = getAnalysisAreaRMS();
+	auto renderAreaRMS = getRenderAreaRMS();
+
+	auto responseAreaSpectr = getAnalysisAreaRMS();
+	auto renderAreaSpectr = getRenderAreaRMS();
 
 	g.setOpacity(1.0f);
 
@@ -50,8 +53,8 @@ void SpectrumAnalyzerComponent::paint (juce::Graphics& g)
 		auto leftChannelFFTPath = leftPathProducer.getPath();
 		auto rightChannelFFTPath = rightPathProducer.getPath();
 
-		leftChannelFFTPath.applyTransform(juce::AffineTransform().translation(responseArea.getX(), -10.0f));
-		rightChannelFFTPath.applyTransform(juce::AffineTransform().translation(responseArea.getX(), -10.0f));
+		leftChannelFFTPath.applyTransform(juce::AffineTransform().translation(responseAreaRMS.getX(), -10.0f));
+		rightChannelFFTPath.applyTransform(juce::AffineTransform().translation(responseAreaRMS.getX(), -10.0f));
 
 		g.setColour(juce::Colours::white);
 		g.strokePath(leftChannelFFTPath, juce::PathStrokeType(1.0f));
@@ -60,14 +63,14 @@ void SpectrumAnalyzerComponent::paint (juce::Graphics& g)
 		g.strokePath(rightChannelFFTPath, juce::PathStrokeType(1.0f));
 
 		g.setColour(juce::Colours::orange);
-		g.drawRoundedRectangle(responseArea.toFloat(), 4.0f, 1.0f);
+		g.drawRoundedRectangle(responseAreaRMS.toFloat(), 4.0f, 1.0f);
 
 		g.clipRegionIntersects(getLocalBounds());
 	}
 	else
 	{
 		g.drawImage(backgroundSpectr, getLocalBounds().toFloat());
-		g.drawImage(spectrogramImage, getAnalysisArea().toFloat());
+		g.drawImage(spectrogramImage, responseAreaSpectr.toFloat());
 	}
 }
 
@@ -82,12 +85,12 @@ void SpectrumAnalyzerComponent::resized()
 	juce::Graphics gRMS(backgroundRMS);
 	juce::Graphics gSpectr(backgroundSpectr);
 
-	auto renderArea = getAnalysisArea();
-	auto left = renderArea.getX();
-	auto right = renderArea.getRight();
-	auto top = renderArea.getY();
-	auto bottom = renderArea.getHeight();
-	auto width = renderArea.getWidth();
+	auto renderAreaRMS = getAnalysisAreaRMS();
+	auto leftRMS = renderAreaRMS.getX();
+	auto rightRMS = renderAreaRMS.getRight();
+	auto topRMS = renderAreaRMS.getY();
+	auto bottomRMS = renderAreaRMS.getHeight();
+	auto widthRMS = renderAreaRMS.getWidth();
 
 	//RMS grid
 	juce::Array<float> freqRMS
@@ -102,13 +105,13 @@ void SpectrumAnalyzerComponent::resized()
 	for(auto f : freqRMS)
 	{
 		auto normX = juce::mapFromLog10(f, 20.0f, 20000.0f);
-		xPos.add(left + width * normX);
+		xPos.add(leftRMS + widthRMS * normX);
 	}
 
 	gRMS.setColour(juce::Colours::dimgrey);
 	for(auto x : xPos)
 	{
-		gRMS.drawVerticalLine(x, top, bottom);
+		gRMS.drawVerticalLine(x, topRMS, bottomRMS);
 	}
 
 	juce::Array<float> gain
@@ -118,9 +121,9 @@ void SpectrumAnalyzerComponent::resized()
 	
 	for(auto gDb : gain)
 	{
-		auto y = juce::jmap(gDb, -24.0f, 24.0f, float(bottom), float(top));
+		auto y = juce::jmap(gDb, -24.0f, 24.0f, float(bottomRMS), float(topRMS));
 		gRMS.setColour(gDb == 0.0f ? juce::Colour(0u, 172u, 1u) : juce::Colours::darkgrey);
-		gRMS.drawHorizontalLine(y, left, right); 
+		gRMS.drawHorizontalLine(y, leftRMS, rightRMS); 
 	}
 
 	//Values representation
@@ -158,7 +161,7 @@ void SpectrumAnalyzerComponent::resized()
 
 	for(auto gDb : gain)
 	{
-		auto y = juce::jmap(gDb, -24.0f, 24.0f, float(bottom), float(top));
+		auto y = juce::jmap(gDb, -24.0f, 24.0f, float(bottomRMS), float(topRMS));
 
 		juce::String str;
 		if (gDb > 0)
@@ -186,6 +189,13 @@ void SpectrumAnalyzerComponent::resized()
 		gRMS.drawFittedText(str, r, juce::Justification::centred, 1);
 	}
 	
+	auto renderAreaSpectr = getAnalysisAreaSpectr();
+	auto leftSpectr = renderAreaSpectr.getX();
+	auto rightSpectr = renderAreaSpectr.getRight();
+	auto topSpectr = renderAreaSpectr.getY();
+	auto bottomSpectr = renderAreaSpectr.getHeight();
+	auto widthSpectr = renderAreaSpectr.getWidth();
+
 	//Spectr Grid
 	juce::Array<float> freqSpectr
 	{
@@ -200,7 +210,7 @@ void SpectrumAnalyzerComponent::resized()
 
 	for (auto f : freqSpectr)
 	{
-		auto y = juce::jmap(f, 20.0f, 20000.0f, float(bottom), float(top));
+		auto y = juce::jmap(f, 20.0f, 20000.0f, float(bottomSpectr), float(topSpectr));
 
 		bool addK = false;
 		juce::String str;
@@ -245,42 +255,48 @@ void SpectrumAnalyzerComponent::selGrid(const int choice)
 	}
 }
 
-juce::Rectangle<int> SpectrumAnalyzerComponent::getRenderArea()
+juce::Rectangle<int> SpectrumAnalyzerComponent::getRenderAreaRMS()
 {
 	auto area = getLocalBounds();
 	
-	if (isRMS)
-	{
-		area.removeFromTop(15);
-		area.removeFromBottom(0);
-		area.removeFromRight(20);
-		area.removeFromLeft(20);
-	}
-	else
-	{
-		area.removeFromTop(0);
-		area.removeFromBottom(-3);
-		area.removeFromRight(31);
-		area.removeFromLeft(0);
-	}
+	
+	area.removeFromTop(15);
+	area.removeFromBottom(0);
+	area.removeFromRight(20);
+	area.removeFromLeft(20);
 
 	return area;
 }
 
-juce::Rectangle<int> SpectrumAnalyzerComponent::getAnalysisArea()
+juce::Rectangle<int> SpectrumAnalyzerComponent::getRenderAreaSpectr()
 {
-	auto area = getRenderArea();
+	auto area = getLocalBounds();
+
+	area.removeFromTop(0);
+	area.removeFromBottom(-3);
+	area.removeFromRight(31);
+	area.removeFromLeft(0);
+
+	return area;
+}
+
+juce::Rectangle<int> SpectrumAnalyzerComponent::getAnalysisAreaRMS()
+{
+	auto area = getRenderAreaRMS();
 	
-	if (isRMS)
-	{
-		area.removeFromTop(0);
-		area.removeFromBottom(2);
-	}
-	else
-	{
-		area.removeFromTop(4);
-		area.removeFromBottom(4);//4
-	}
+	area.removeFromTop(0);
+	area.removeFromBottom(2);
+
+	return area;
+}
+
+juce::Rectangle<int> SpectrumAnalyzerComponent::getAnalysisAreaSpectr()
+{
+	auto area = getRenderAreaSpectr();
+
+	area.removeFromTop(4);
+	area.removeFromBottom(4);//4
+
 	return area;
 }
 
@@ -331,24 +347,19 @@ void PathProducer::process(juce::Rectangle<float> fftBounds, double sampleRate)
 
 void SpectrumAnalyzerComponent::timerCallback()
 {
-	//if (isRMS)
-	//{
-		auto fftBounds = getAnalysisArea().toFloat();
+		auto fftBounds = getAnalysisAreaRMS().toFloat();
 
 		leftPathProducer.process(fftBounds, sampleRate);
 		rightPathProducer.process(fftBounds, sampleRate);
 
 		repaint();
-	//}
-	//else
-	//{
+
 		if (nextFFTBlockReady)
 		{
 			drawNextLineOfSpectrogram();
 			nextFFTBlockReady = false;
 			repaint();
 		}
-	/*}*/
 }
 
 void SpectrumAnalyzerComponent::pushNextSampleIntoFifo(float sample) noexcept
