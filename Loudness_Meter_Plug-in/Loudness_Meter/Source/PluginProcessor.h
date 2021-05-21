@@ -146,12 +146,12 @@ private:
 //==============================================================================
 /**
 */
-class Loudness_Checker_PluginAudioProcessor  : public juce::AudioProcessor
+class Loudness_MeterAudioProcessor  : public juce::AudioProcessor
 {
 public:
     //==============================================================================
-    Loudness_Checker_PluginAudioProcessor();
-    ~Loudness_Checker_PluginAudioProcessor() override;
+    Loudness_MeterAudioProcessor();
+    ~Loudness_MeterAudioProcessor() override;
 
     //==============================================================================
     void prepareToPlay (double sampleRate, int samplesPerBlock) override;
@@ -188,9 +188,25 @@ public:
 
 	juce::AudioProcessorValueTreeState apvts;
 
+	using BlockType = juce::AudioBuffer<float>;
+	SingleChannelSampleFifo<BlockType> leftChannelFifo{ Channel::Left };
+	SingleChannelSampleFifo<BlockType> rightChannelFifo{ Channel::Right };
+
+	enum
+	{
+		fftOrder = 11,//10
+		fftSize = 1 << fftOrder //adds the ordet 10 into the binary number, so 10 extra zeros (00010000000000 = 1024)
+	};
+
+	float fifo[fftSize];
+	int fifoIndex = 0;
+	float fftData[2 * fftSize];
+	bool nextFFTBlockReady = false;
+
 private:
-
+    
+	void pushNextSampleIntoFifo(float) noexcept;
 	juce::AudioProcessorValueTreeState::ParameterLayout createParams();
-
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Loudness_Checker_PluginAudioProcessor)
+	
+	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Loudness_MeterAudioProcessor)
 };
