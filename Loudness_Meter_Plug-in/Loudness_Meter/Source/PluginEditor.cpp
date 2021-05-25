@@ -32,7 +32,7 @@ Loudness_MeterAudioProcessorEditor::Loudness_MeterAudioProcessorEditor (Loudness
 
 Loudness_MeterAudioProcessorEditor::~Loudness_MeterAudioProcessorEditor()
 {
-	myAttachments.clear();
+	myAttachments.clear(); 
 }
 
 void Loudness_MeterAudioProcessorEditor::paint (juce::Graphics& g)

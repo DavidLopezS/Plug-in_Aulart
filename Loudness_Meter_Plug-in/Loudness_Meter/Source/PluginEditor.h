@@ -258,6 +258,21 @@ public:
 		auto widthRMS = renderAreaRMS.getWidth();
 
 		//RMS grid
+		RMSGrid(gRMS, renderAreaRMS, leftRMS, rightRMS, topRMS, bottomRMS, widthRMS);
+
+		auto renderAreaSpectr = getAnalysisAreaSpectr();
+		auto leftSpectr = renderAreaSpectr.getX();
+		auto rightSpectr = renderAreaSpectr.getRight();
+		auto topSpectr = renderAreaSpectr.getY();
+		auto bottomSpectr = renderAreaSpectr.getHeight();
+		auto widthSpectr = renderAreaSpectr.getWidth();
+
+		//Spectr Grid
+		spectrGrid(gSpectr, renderAreaSpectr, leftSpectr, rightSpectr, topSpectr, bottomSpectr, widthSpectr);
+	}
+
+	void RMSGrid(juce::Graphics& gRMS, juce::Rectangle<int> renderAreaRMS, int leftRMS, int rightRMS, int topRMS, int bottomRMS, int widthRMS)
+	{
 		juce::Array<float> freqRMS
 		{
 			20, 50, 100,
@@ -353,15 +368,10 @@ public:
 
 			gRMS.drawFittedText(str, r, juce::Justification::centred, 1);
 		}
+	}
 
-		auto renderAreaSpectr = getAnalysisAreaSpectr();
-		auto leftSpectr = renderAreaSpectr.getX();
-		auto rightSpectr = renderAreaSpectr.getRight();
-		auto topSpectr = renderAreaSpectr.getY();
-		auto bottomSpectr = renderAreaSpectr.getHeight();
-		auto widthSpectr = renderAreaSpectr.getWidth();
-
-		//Spectr Grid
+	void spectrGrid(juce::Graphics& gSpectr, juce::Rectangle<int> renderAreaSpectr, int leftSpectr, int rightSpectr, int topSpectr, int bottomSpectr, int widthSpectr)
+	{
 		juce::Array<float> freqSpectr
 		{
 			20, 5000, 10000, 15000, 20000
