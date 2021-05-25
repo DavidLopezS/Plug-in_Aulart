@@ -208,10 +208,8 @@ public:
 		g.fillAll(juce::Colours::black);
 
 		auto responseAreaRMS = getAnalysisAreaRMS();
-		auto renderAreaRMS = getRenderAreaRMS();
 
 		auto responseAreaSpectr = getAnalysisAreaRMS();
-		auto renderAreaSpectr = getRenderAreaRMS();
 
 		g.setOpacity(1.0f);
 
@@ -233,14 +231,14 @@ public:
 
 			g.setColour(juce::Colours::orange);
 			g.drawRoundedRectangle(responseAreaRMS.toFloat(), 4.0f, 1.0f);
-
-			g.clipRegionIntersects(getLocalBounds());
 		}
 		else
 		{
 			g.drawImage(backgroundSpectr, getLocalBounds().toFloat());
 			g.drawImage(spectrogramImage, responseAreaSpectr.toFloat());
 		}
+
+		g.clipRegionIntersects(getLocalBounds());
 	}
 
 	void resized() override
@@ -533,6 +531,7 @@ public:
     //==============================================================================
     void paint (juce::Graphics&) override;
     void resized() override;
+	void knobAttachment(int);
 
 	SpectrogramAndRMSRep gridRepresentation;
 
@@ -540,8 +539,64 @@ private:
 	
     Loudness_MeterAudioProcessor& audioProcessor;
 
+	//Spectr selector and attachment
 	juce::ComboBox spectrRMSSelector;
 	std::unique_ptr<juce::AudioProcessorValueTreeState::ComboBoxAttachment> spectrRMSSelectorAttachment;
+
+	//Knobs attachment
+	static constexpr auto numKnobs = 8;
+
+	juce::String myKnobName[numKnobs]
+	{
+		"MINDBKNOWRMS", "MAXDBKNOBRMS", "SKEWEDPROPYRMS", "FFTDATAINDEXRMS",
+		"LVLOFFSETRMS", "LVLKNOBSPECTR", "SKEWEDPROPYSPECTR", "LVLOFFSETSPECTR"
+	};
+
+	using Attachment = juce::AudioProcessorValueTreeState::SliderAttachment;
+	std::vector<std::unique_ptr<Attachment>> myAttachments;
+
+	struct KnobManager : public Component
+	{
+		KnobManager(juce::Colour c) : backgroundColour(c)
+		{
+			for (int i = 0; i < numKnobs; ++i)
+			{
+				auto* knobSlider = new juce::Slider();
+				knobSlider->setSliderStyle(juce::Slider::SliderStyle::RotaryHorizontalVerticalDrag);
+				knobSlider->setTextBoxStyle(juce::Slider::TextBoxBelow, true, 100, 50);
+				addAndMakeVisible(myKnobs.add(knobSlider));
+			}
+		}
+
+		void paint(juce::Graphics& g) override
+		{
+			g.fillAll(backgroundColour);
+		}
+
+		void resized() override
+		{
+			juce::FlexBox knobBox;
+			knobBox.flexWrap = juce::FlexBox::Wrap::wrap;
+			knobBox.justifyContent = juce::FlexBox::JustifyContent::spaceBetween;
+
+			for (auto *k : myKnobs)
+				knobBox.items.add(juce::FlexItem(*k).withMinHeight(50.0f).withMinWidth(50.0f).withFlex(1));
+
+			//----------------------------------------------------------------------------------------------
+
+			juce::FlexBox fb;
+			fb.flexDirection = juce::FlexBox::Direction::row;
+
+			fb.items.add(juce::FlexItem(knobBox).withFlex(2.5f));
+
+			fb.performLayout(getLocalBounds().toFloat());
+		}
+
+		juce::Colour backgroundColour;
+		juce::OwnedArray<juce::Slider> myKnobs;
+	};
+
+	KnobManager mydBKnobs;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Loudness_MeterAudioProcessorEditor)
 };
