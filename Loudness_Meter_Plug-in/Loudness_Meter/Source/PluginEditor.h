@@ -222,8 +222,8 @@ public:
 			auto leftChannelFFTPath = leftPathProducer.getPath();
 			auto rightChannelFFTPath = rightPathProducer.getPath();
 
-			leftChannelFFTPath.applyTransform(juce::AffineTransform().translation(responseAreaRMS.getX(), -10.0f));
-			rightChannelFFTPath.applyTransform(juce::AffineTransform().translation(responseAreaRMS.getX(), -10.0f));
+			leftChannelFFTPath.applyTransform(juce::AffineTransform().translation(responseAreaRMS.getX(), -10.0f));//-10.0f
+			rightChannelFFTPath.applyTransform(juce::AffineTransform().translation(responseAreaRMS.getX(), -10.0f));//-10.0f
 
 			g.setColour(juce::Colours::white);
 			g.strokePath(leftChannelFFTPath, juce::PathStrokeType(1.0f));
