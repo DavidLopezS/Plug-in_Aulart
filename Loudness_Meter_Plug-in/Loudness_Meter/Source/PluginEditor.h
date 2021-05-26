@@ -163,7 +163,7 @@ struct PathProducer
 {
 public:
 
-	PathProducer(SingleChannelSampleFifo<juce::AudioBuffer<float>>& scsf) : leftChannelFifo(&scsf)
+	PathProducer(SingleChannelSampleFifo<juce::AudioBuffer<float>>& scsf) : leftChannelFifo(&scsf), offsetRMS(-48.0f)
 	{
 		//48000 / 2048 = 23hz, a lot of resolution in the upper end, not a lot in the bottom
 		leftChannelFFTDataGenerator.changeOrder(FFTOrder::order4096);
@@ -172,6 +172,8 @@ public:
 
 	void process(juce::Rectangle<float> fftBounds, double sampleRate);
 	juce::Path getPath() { return leftChannelFFTPath; }
+
+	float offsetRMS;
 
 private:
 
@@ -518,6 +520,12 @@ public:
 
 	}
 
+	void changeRMSOffset(const float myRMSOffset)
+	{
+		leftPathProducer.offsetRMS = myRMSOffset;
+		rightPathProducer.offsetRMS = myRMSOffset;
+	}
+
 private:
 	Loudness_MeterAudioProcessor& audioPrc;
 
@@ -555,12 +563,13 @@ private:
 	std::unique_ptr<juce::AudioProcessorValueTreeState::ComboBoxAttachment> spectrRMSSelectorAttachment;
 
 	//Knobs attachment
-	static constexpr auto numKnobs = 8;
+	static constexpr auto numKnobs = 9;
 
 	juce::String myKnobName[numKnobs]
 	{
 		"MINDBKNOWRMS", "MAXDBKNOBRMS", "SKEWEDPROPYRMS", "FFTDATAINDEXRMS",
-		"LVLOFFSETRMS", "LVLKNOBSPECTR", "SKEWEDPROPYSPECTR", "LVLOFFSETSPECTR"
+		"LVLOFFSETRMS", "LVLKNOBSPECTR", "SKEWEDPROPYSPECTR", "LVLOFFSETSPECTR",
+		"RMSLINEOFFSET"
 	};
 
 	using Attachment = juce::AudioProcessorValueTreeState::SliderAttachment;

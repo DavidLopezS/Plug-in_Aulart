@@ -150,6 +150,7 @@ void Loudness_MeterAudioProcessor::processBlock (juce::AudioBuffer<float>& buffe
 	}
 
 	auto &graftOutputType = *apvts.getRawParameterValue("GRAFTYPE");
+	auto &rmsLevelOffset = *apvts.getRawParameterValue("RMSLINEOFFSET");
 	//auto &maxRMSdB = *apvts.getRawParameterValue("MAXDBKNOBRMS");
 	//auto &minRMSdB = *apvts.getRawParameterValue("MINDBKNOWRMS");
 	//auto &skPropRMS = *apvts.getRawParameterValue("SKEWEDPROPYRMS");
@@ -164,6 +165,7 @@ void Loudness_MeterAudioProcessor::processBlock (juce::AudioBuffer<float>& buffe
 	{
 
 		myRepData->gridRepresentation.selGrid(graftOutputType);
+		myRepData->gridRepresentation.changeRMSOffset(rmsLevelOffset);
 
 	}
 }
@@ -245,6 +247,9 @@ juce::AudioProcessorValueTreeState::ParameterLayout Loudness_MeterAudioProcessor
 
 	//Level Offset Spectrogram
 	params.push_back(std::make_unique<juce::AudioParameterFloat>("LVLOFFSETSPECTR", "Level Offset Spectrogram", juce::NormalisableRange<float>{0.0f, 5.0f, 0.1f}, 3.9f));
+
+	//RMS Line Offset
+	params.push_back(std::make_unique<juce::AudioParameterFloat>("RMSLINEOFFSET", "RMS Line Offser", juce::NormalisableRange<float>{-200.0f, -1.0f, 1.0f}, -48.0f));
 
 	return{ params.begin(), params.end() };
 
