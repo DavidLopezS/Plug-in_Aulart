@@ -166,7 +166,7 @@ public:
 	PathProducer(SingleChannelSampleFifo<juce::AudioBuffer<float>>& scsf) : leftChannelFifo(&scsf)
 	{
 		//48000 / 2048 = 23hz, a lot of resolution in the upper end, not a lot in the bottom
-		leftChannelFFTDataGenerator.changeOrder(FFTOrder::order2048);
+		leftChannelFFTDataGenerator.changeOrder(FFTOrder::order4096);
 		monoBuffer.setSize(1, leftChannelFFTDataGenerator.getFFTSize());
 	}
 
@@ -243,12 +243,10 @@ public:
 
 	void resized() override
 	{
+		//RMS grid
 		backgroundRMS = juce::Image(juce::Image::PixelFormat::RGB, getWidth(), getHeight(), true);
-		backgroundSpectr = juce::Image(juce::Image::PixelFormat::RGB, getWidth(), getHeight(), true);
-
 
 		juce::Graphics gRMS(backgroundRMS);
-		juce::Graphics gSpectr(backgroundSpectr);
 
 		auto renderAreaRMS = getAnalysisAreaRMS();
 		auto leftRMS = renderAreaRMS.getX();
@@ -257,8 +255,12 @@ public:
 		auto bottomRMS = renderAreaRMS.getHeight();
 		auto widthRMS = renderAreaRMS.getWidth();
 
-		//RMS grid
 		RMSGrid(gRMS, renderAreaRMS, leftRMS, rightRMS, topRMS, bottomRMS, widthRMS);
+
+		//Spectr Grid
+		backgroundSpectr = juce::Image(juce::Image::PixelFormat::RGB, getWidth(), getHeight(), true);
+
+		juce::Graphics gSpectr(backgroundSpectr);
 
 		auto renderAreaSpectr = getAnalysisAreaSpectr();
 		auto leftSpectr = renderAreaSpectr.getX();
@@ -267,7 +269,6 @@ public:
 		auto bottomSpectr = renderAreaSpectr.getHeight();
 		auto widthSpectr = renderAreaSpectr.getWidth();
 
-		//Spectr Grid
 		spectrGrid(gSpectr, renderAreaSpectr, leftSpectr, rightSpectr, topSpectr, bottomSpectr, widthSpectr);
 	}
 

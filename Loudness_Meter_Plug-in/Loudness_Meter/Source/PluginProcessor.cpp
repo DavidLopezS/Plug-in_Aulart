@@ -164,17 +164,7 @@ void Loudness_MeterAudioProcessor::processBlock (juce::AudioBuffer<float>& buffe
 	{
 
 		myRepData->gridRepresentation.selGrid(graftOutputType);
-	//	mySpectrData->mySpectrAnComp.leftChannelFifo.update(buffer);//RMS buffer input
-	//	mySpectrData->mySpectrAnComp.rightChannelFifo.update(buffer);//RMS buffer input
-	//	mySpectrData->mySpectrAnComp.processAudioBlock(buffer);//Spectrogram buffer input
-	//	//mySpectrData->mySpectrRep.processAudioBlock(buffer);//Spectrogram buffer input
 
-	//	mySpectrData->mySpectrAnComp.sampleRate = this->getSampleRate();
-	//	mySpectrData->mySpectrAnComp.selGrid(graftOutputType);
-
-	//	mySpectrData->mySpectrRep.lvlKnobSpectr = lvlKnobSpectr.load();
-	//	mySpectrData->mySpectrRep.skewedPropSpectr = skPropSpectr.load();
-	//	mySpectrData->mySpectrRep.lvlOffsetSpectr = lvlOffSpectr.load();
 	}
 }
 
