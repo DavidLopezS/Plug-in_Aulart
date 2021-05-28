@@ -163,16 +163,36 @@ struct PathProducer
 {
 public:
 
-	PathProducer(SingleChannelSampleFifo<juce::AudioBuffer<float>>& scsf) : leftChannelFifo(&scsf), offsetRMS(-48.0f)
+	PathProducer(SingleChannelSampleFifo<juce::AudioBuffer<float>>& scsf) : leftChannelFifo(&scsf), offsetRMS(-48.0f)/*, orderChoice(0)*/
 	{
 		//48000 / 2048 = 23hz, a lot of resolution in the upper end, not a lot in the bottom
-		leftChannelFFTDataGenerator.changeOrder(FFTOrder::order4096);
+		leftChannelFFTDataGenerator.changeOrder(FFTOrder::order2048);
 		monoBuffer.setSize(1, leftChannelFFTDataGenerator.getFFTSize());
 	}
 
 	void process(juce::Rectangle<float> fftBounds, double sampleRate);
 	juce::Path getPath() { return leftChannelFFTPath; }
+	
+	void fftOrderSwitch(const int orderChoice)
+	{
+		switch (orderChoice)
+		{
+		case 0:
+			leftChannelFFTDataGenerator.changeOrder(FFTOrder::order2048);
+			break;
+		case 1:
+			leftChannelFFTDataGenerator.changeOrder(FFTOrder::order4096);
+			break;
+		case 2:
+			leftChannelFFTDataGenerator.changeOrder(FFTOrder::order8192);
+			break;
+		default:
+			jassertfalse;
+			break;
+		}
+	}
 
+	//int orderChoice;
 	float offsetRMS;
 
 private:
@@ -526,6 +546,12 @@ public:
 		rightPathProducer.offsetRMS = myRMSOffset;
 	}
 
+	void pathOrderChoice(const int choice)
+	{
+		//leftPathProducer.fftOrderSwitch(choice);
+		//rightPathProducer.fftOrderSwitch(choice);
+	}
+
 private:
 	Loudness_MeterAudioProcessor& audioPrc;
 
@@ -551,6 +577,7 @@ public:
     void paint (juce::Graphics&) override;
     void resized() override;
 	void knobAttachment(int);
+	void selectorAttachment(int);
 
 	SpectrogramAndRMSRep gridRepresentation;
 
@@ -560,7 +587,6 @@ private:
 
 	//Spectr selector and attachment
 	juce::ComboBox spectrRMSSelector;
-	std::unique_ptr<juce::AudioProcessorValueTreeState::ComboBoxAttachment> spectrRMSSelectorAttachment;
 
 	//Knobs attachment
 	static constexpr auto numKnobs = 9;
@@ -573,7 +599,7 @@ private:
 	};
 
 	using Attachment = juce::AudioProcessorValueTreeState::SliderAttachment;
-	std::vector<std::unique_ptr<Attachment>> myAttachments;
+	std::vector<std::unique_ptr<Attachment>> myKnobAttachments;
 
 	struct KnobManager : public Component
 	{
@@ -586,7 +612,7 @@ private:
 				knobSlider->setTextBoxStyle(juce::Slider::TextBoxBelow, true, 100, 50);
 				addAndMakeVisible(myKnobs.add(knobSlider));
 
-				myLabels[i].setColour(juce::Label::ColourIds::textColourId, juce::Colours::white);
+				myLabels[i].setColour(juce::Label::ColourIds::textColourId, juce::Colours::ghostwhite);
 				myLabels[i].setFont(20.0f);
 				myLabels[i].setJustificationType(juce::Justification::centred);
 				addAndMakeVisible(myLabels[i]);
@@ -655,6 +681,63 @@ private:
 	};
 
 	KnobManager mydBKnobs;
+	
+	//Selector Manager
+	static constexpr auto numSelectors = 2;
+
+	juce::String mySelectorNames[numSelectors]
+	{
+		"GRAFTYPE", "ORDERSWITCH"
+	};
+
+	using ComboBoxAttachment = juce::AudioProcessorValueTreeState::ComboBoxAttachment;
+	std::vector<std::unique_ptr<ComboBoxAttachment>> mySelectorAttachments;
+
+	struct SelectorManager : public Component
+	{
+		SelectorManager(juce::Colour c) : backgroundColour(c)
+		{
+			for(int i = 0; i < numSelectors; ++i)
+			{
+				auto* myComboBox = new juce::ComboBox();
+				myComboBox->addItemList(choices[i], 1);
+				addAndMakeVisible(myComboBoxes.add(myComboBox));
+			}
+		}
+
+		void paint(juce::Graphics& g) override
+		{
+			g.fillAll(backgroundColour);
+		}
+
+		void resized() override
+		{
+			juce::Rectangle<int> bounds = getLocalBounds();
+
+			juce::FlexBox comboFlexBox;
+			comboFlexBox.flexWrap = juce::FlexBox::Wrap::wrap;
+			comboFlexBox.justifyContent = juce::FlexBox::JustifyContent::spaceBetween;
+
+			for (auto *cB : myComboBoxes)
+				comboFlexBox.items.add(juce::FlexItem(*cB).withMinHeight(50.0f).withMinWidth(50.0f).withFlex(1.f));
+
+			juce::FlexBox fb;
+			fb.flexDirection = juce::FlexBox::Direction::row;
+
+			fb.items.add(juce::FlexItem(comboFlexBox).withFlex(2.5f));
+
+			fb.performLayout(bounds);
+		}
+		
+		juce::Colour backgroundColour;
+		juce::OwnedArray<juce::ComboBox> myComboBoxes;
+		juce::StringArray choices[numSelectors]
+		{
+			{ "RMS", "Spectrogram" }, { "Order 2048", "Order 2048", "Order 2048" }
+		};
+	};
+
+	SelectorManager mySelectorManager;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Loudness_MeterAudioProcessorEditor)
 };

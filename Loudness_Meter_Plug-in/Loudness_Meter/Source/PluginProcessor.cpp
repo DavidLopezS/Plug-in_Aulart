@@ -150,6 +150,7 @@ void Loudness_MeterAudioProcessor::processBlock (juce::AudioBuffer<float>& buffe
 	}
 
 	auto &graftOutputType = *apvts.getRawParameterValue("GRAFTYPE");
+	auto &orderSwitch = *apvts.getRawParameterValue("ORDERSWITCH");
 	auto &rmsLevelOffset = *apvts.getRawParameterValue("RMSLINEOFFSET");
 	//auto &maxRMSdB = *apvts.getRawParameterValue("MAXDBKNOBRMS");
 	//auto &minRMSdB = *apvts.getRawParameterValue("MINDBKNOWRMS");
@@ -166,6 +167,7 @@ void Loudness_MeterAudioProcessor::processBlock (juce::AudioBuffer<float>& buffe
 
 		myRepData->gridRepresentation.selGrid(graftOutputType);
 		myRepData->gridRepresentation.changeRMSOffset(rmsLevelOffset);
+		myRepData->gridRepresentation.pathOrderChoice(orderSwitch);
 
 	}
 }
@@ -223,6 +225,9 @@ juce::AudioProcessorValueTreeState::ParameterLayout Loudness_MeterAudioProcessor
 
 	//Representation Switch
 	params.push_back(std::make_unique<juce::AudioParameterChoice>("GRAFTYPE", "Graf Type", juce::StringArray{ "RMS", "Spectrogram" }, 0));
+
+	//Order Switch
+	params.push_back(std::make_unique<juce::AudioParameterChoice>("ORDERSWITCH", "Order Switch", juce::StringArray{ "Order 2048", "Order 4096", "Order 8192" }, 0));
 
 	//Max db Knob RMS
 	params.push_back(std::make_unique<juce::AudioParameterFloat>("MAXDBKNOBRMS", "Max db Knob RMS", juce::NormalisableRange<float>{0.0f, 100.0f, 0.1f}, 0.0f));

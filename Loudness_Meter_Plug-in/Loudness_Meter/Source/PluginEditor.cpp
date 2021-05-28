@@ -11,28 +11,25 @@
 
 //==============================================================================
 Loudness_MeterAudioProcessorEditor::Loudness_MeterAudioProcessorEditor (Loudness_MeterAudioProcessor& p)
-    : AudioProcessorEditor (&p), audioProcessor (p), gridRepresentation(p), mydBKnobs(juce::Colours::darkgrey)
+    : AudioProcessorEditor (&p), audioProcessor (p), gridRepresentation(p), mydBKnobs(juce::Colours::darkgrey), mySelectorManager(juce::Colours::darkgrey)
 {
-
-	juce::StringArray choices{ "RMS", "Spectrogram" };
-	spectrRMSSelector.addItemList(choices, 1);
-	addAndMakeVisible(&spectrRMSSelector);
-
-	spectrRMSSelectorAttachment = std::make_unique<juce::AudioProcessorValueTreeState::ComboBoxAttachment>(audioProcessor.apvts, "GRAFTYPE", spectrRMSSelector);
-
 	addAndMakeVisible(&gridRepresentation);
 
 	addAndMakeVisible(&mydBKnobs);
-
 	for (int i = 0; i < numKnobs; ++i)
 		knobAttachment(i);
+
+	addAndMakeVisible(&mySelectorManager);
+	for (int i = 0; i < numSelectors; ++i)
+		selectorAttachment(i);
 
     setSize (900, 500);
 }
 
 Loudness_MeterAudioProcessorEditor::~Loudness_MeterAudioProcessorEditor()
 {
-	myAttachments.clear(); 
+	myKnobAttachments.clear(); 
+	mySelectorAttachments.clear();
 }
 
 void Loudness_MeterAudioProcessorEditor::paint (juce::Graphics& g)
@@ -50,7 +47,7 @@ void Loudness_MeterAudioProcessorEditor::resized()
 	grid.templateRows = { Track(Fr(2)), Track(Fr(1)), Track(Fr(2)) };
 	grid.templateColumns = { Track(Fr(1)) };
 
-	grid.items = { juce::GridItem(gridRepresentation), juce::GridItem(spectrRMSSelector), juce::GridItem(mydBKnobs) };
+	grid.items = { juce::GridItem(gridRepresentation), juce::GridItem(mySelectorManager), juce::GridItem(mydBKnobs) };
 
 	grid.performLayout(getLocalBounds());
 }
@@ -99,5 +96,13 @@ void Loudness_MeterAudioProcessorEditor::knobAttachment(int knobId)
 	auto &myKnobs = *mydBKnobs.myKnobs[knobId];
 
 	using Attachment = juce::AudioProcessorValueTreeState::SliderAttachment;
-	myAttachments.push_back(std::make_unique<Attachment>(audioProcessor.apvts, myKnobName[knobId], myKnobs));
+	myKnobAttachments.push_back(std::make_unique<Attachment>(audioProcessor.apvts, myKnobName[knobId], myKnobs));
+}
+
+void Loudness_MeterAudioProcessorEditor::selectorAttachment(int selectorId)
+{
+	auto &mySelectors = *mySelectorManager.myComboBoxes[selectorId];
+
+	using ComboBoxAttachment = juce::AudioProcessorValueTreeState::ComboBoxAttachment;
+	mySelectorAttachments.push_back(std::make_unique<ComboBoxAttachment>(audioProcessor.apvts, mySelectorNames[selectorId], mySelectors));
 }
