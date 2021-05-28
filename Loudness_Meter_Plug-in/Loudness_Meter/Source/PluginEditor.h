@@ -163,18 +163,9 @@ struct PathProducer
 {
 public:
 
-	PathProducer(SingleChannelSampleFifo<juce::AudioBuffer<float>>& scsf) : leftChannelFifo(&scsf), offsetRMS(-48.0f)/*, orderChoice(0)*/
+	PathProducer(SingleChannelSampleFifo<juce::AudioBuffer<float>>& scsf) : leftChannelFifo(&scsf), offsetRMS(-48.0f), orderChoice(0)
 	{
 		//48000 / 2048 = 23hz, a lot of resolution in the upper end, not a lot in the bottom
-		leftChannelFFTDataGenerator.changeOrder(FFTOrder::order2048);
-		monoBuffer.setSize(1, leftChannelFFTDataGenerator.getFFTSize());
-	}
-
-	void process(juce::Rectangle<float> fftBounds, double sampleRate);
-	juce::Path getPath() { return leftChannelFFTPath; }
-	
-	void fftOrderSwitch(const int orderChoice)
-	{
 		switch (orderChoice)
 		{
 		case 0:
@@ -190,9 +181,32 @@ public:
 			jassertfalse;
 			break;
 		}
+		monoBuffer.setSize(1, leftChannelFFTDataGenerator.getFFTSize());
 	}
 
-	//int orderChoice;
+	void process(juce::Rectangle<float> fftBounds, double sampleRate);
+	juce::Path getPath() { return leftChannelFFTPath; }
+	
+	//void fftOrderSwitch(const int orderChoice)
+	//{
+	//	switch (orderChoice)
+	//	{
+	//	case 0:
+	//		leftChannelFFTDataGenerator.changeOrder(FFTOrder::order2048);
+	//		break;
+	//	case 1:
+	//		leftChannelFFTDataGenerator.changeOrder(FFTOrder::order4096);
+	//		break;
+	//	case 2:
+	//		leftChannelFFTDataGenerator.changeOrder(FFTOrder::order8192);
+	//		break;
+	//	default:
+	//		jassertfalse;
+	//		break;
+	//	}
+	//}
+
+	int orderChoice;
 	float offsetRMS;
 
 private:
@@ -548,8 +562,8 @@ public:
 
 	void pathOrderChoice(const int choice)
 	{
-		//leftPathProducer.fftOrderSwitch(choice);
-		//rightPathProducer.fftOrderSwitch(choice);
+		leftPathProducer.orderChoice = choice;
+		rightPathProducer.orderChoice = choice;
 	}
 
 private:
@@ -733,7 +747,7 @@ private:
 		juce::OwnedArray<juce::ComboBox> myComboBoxes;
 		juce::StringArray choices[numSelectors]
 		{
-			{ "RMS", "Spectrogram" }, { "Order 2048", "Order 2048", "Order 2048" }
+			{ "RMS", "Spectrogram" }, { "Order 2048", "Order 4096", "Order 8192" }
 		};
 	};
 
