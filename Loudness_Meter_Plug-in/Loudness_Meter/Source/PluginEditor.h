@@ -33,10 +33,10 @@ struct FFTDataGenerator
 		std::copy(readIndex, readIndex + fftSize, fftData.begin());
 
 		// first apply a windowing function to our data
-		window->multiplyWithWindowingTable(fftData.data(), fftSize);       // [1]
+		window->multiplyWithWindowingTable(fftData.data(), fftSize);       
 
 		// then render our FFT data..
-		forwardFFT->performFrequencyOnlyForwardTransform(fftData.data());  // [2]
+		forwardFFT->performFrequencyOnlyForwardTransform(fftData.data());  
 
 		int numBins = (int)fftSize / 2;
 
@@ -229,7 +229,8 @@ public:
 
 	SpectrogramAndRMSRep(Loudness_MeterAudioProcessor& p) : audioPrc(p), 
 															forwardFFT(audioPrc.fftOrder), spectrogramImage(juce::Image::RGB, 512, 512, true),
-															leftPathProducer(audioPrc.leftChannelFifo), rightPathProducer(audioPrc.rightChannelFifo)
+															leftPathProducer(audioPrc.leftChannelFifo), rightPathProducer(audioPrc.rightChannelFifo),
+															lineColour(0)
 	{
 		startTimerHz(30);//30
 	}
@@ -245,7 +246,7 @@ public:
 
 		auto responseAreaRMS = getAnalysisAreaRMS();
 
-		auto responseAreaSpectr = getAnalysisAreaRMS();
+		auto responseAreaSpectr = getAnalysisAreaSpectr();
 
 		g.setOpacity(1.0f);
 
@@ -291,7 +292,25 @@ public:
 		auto bottomRMS = renderAreaRMS.getHeight();
 		auto widthRMS = renderAreaRMS.getWidth();
 
-		RMSGrid(gRMS, renderAreaRMS, leftRMS, rightRMS, topRMS, bottomRMS, widthRMS);
+		juce::Colour myColour;
+
+		switch(lineColour)
+		{
+		case 0:
+			myColour = juce::Colour(0u, 172u, 1u);//Green
+			break;
+		case 1:
+			myColour = juce::Colour(243u, 26u, 26u);//Red
+			break;
+		case 2:
+			myColour = juce::Colour(26u, 229u, 243u);//Blue
+			break;
+		default: 
+			jassertfalse;
+			break;
+		}
+
+		RMSGrid(gRMS, renderAreaRMS, leftRMS, rightRMS, topRMS, bottomRMS, widthRMS, myColour);
 
 		//Spectr Grid
 		backgroundSpectr = juce::Image(juce::Image::PixelFormat::RGB, getWidth(), getHeight(), true);
@@ -308,7 +327,7 @@ public:
 		spectrGrid(gSpectr, renderAreaSpectr, leftSpectr, rightSpectr, topSpectr, bottomSpectr, widthSpectr);
 	}
 
-	void RMSGrid(juce::Graphics& gRMS, juce::Rectangle<int> renderAreaRMS, int leftRMS, int rightRMS, int topRMS, int bottomRMS, int widthRMS)
+	void RMSGrid(juce::Graphics& gRMS, juce::Rectangle<int> renderAreaRMS, int leftRMS, int rightRMS, int topRMS, int bottomRMS, int widthRMS, juce::Colour myColour)
 	{
 		juce::Array<float> freqRMS
 		{
@@ -339,7 +358,7 @@ public:
 		for (auto gDb : gain)
 		{
 			auto y = juce::jmap(gDb, -24.0f, 24.0f, float(bottomRMS), float(topRMS));
-			gRMS.setColour(gDb == 0.0f ? juce::Colour(0u, 172u, 1u) : juce::Colours::darkgrey);
+			gRMS.setColour(gDb == 0.0f ? myColour : juce::Colours::darkgrey);
 			gRMS.drawHorizontalLine(y, leftRMS, rightRMS);
 		}
 
@@ -392,7 +411,7 @@ public:
 			r.setX(getWidth() - textWidth);
 			r.setCentre(r.getCentreX(), y);
 
-			gRMS.setColour(gDb == 0.0f ? juce::Colour(0u, 172u, 1u) : juce::Colours::lightgrey);
+			gRMS.setColour(gDb == 0.0f ? myColour : juce::Colours::lightgrey);
 
 			gRMS.drawFittedText(str, r, juce::Justification::centred, 1);
 
@@ -566,6 +585,11 @@ public:
 		rightPathProducer.orderChoice = choice;
 	}
 
+	void lineColourChoice(const int choiceColour)
+	{
+		lineColour = choiceColour;
+	}
+
 private:
 	Loudness_MeterAudioProcessor& audioPrc;
 
@@ -577,6 +601,7 @@ private:
 	PathProducer leftPathProducer, rightPathProducer;
 
 	bool isRMS = false;
+	int lineColour = 0;
 };
 
 //==============================================================================
@@ -598,9 +623,6 @@ public:
 private:
 	
     Loudness_MeterAudioProcessor& audioProcessor;
-
-	//Spectr selector and attachment
-	juce::ComboBox spectrRMSSelector;
 
 	//Knobs attachment
 	static constexpr auto numKnobs = 9;
@@ -696,12 +718,12 @@ private:
 
 	KnobManager mydBKnobs;
 	
-	//Selector Manager
-	static constexpr auto numSelectors = 2;
+	//Spectr selector and attachment	
+	static constexpr auto numSelectors = 3;
 
 	juce::String mySelectorNames[numSelectors]
 	{
-		"GRAFTYPE", "ORDERSWITCH"
+		"GRAFTYPE", "ORDERSWITCH", "COLOURGRIDSWITCH"
 	};
 
 	using ComboBoxAttachment = juce::AudioProcessorValueTreeState::ComboBoxAttachment;
@@ -747,7 +769,7 @@ private:
 		juce::OwnedArray<juce::ComboBox> myComboBoxes;
 		juce::StringArray choices[numSelectors]
 		{
-			{ "RMS", "Spectrogram" }, { "Order 2048", "Order 4096", "Order 8192" }
+			{ "RMS", "Spectrogram" }, { "Order 2048", "Order 4096", "Order 8192" }, { "Green", "Red", "Blue" }
 		};
 	};
 
