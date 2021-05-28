@@ -567,9 +567,9 @@ private:
 
 	juce::String myKnobName[numKnobs]
 	{
-		"MINDBKNOWRMS", "MAXDBKNOBRMS", "SKEWEDPROPYRMS", "FFTDATAINDEXRMS",
-		"LVLOFFSETRMS", "LVLKNOBSPECTR", "SKEWEDPROPYSPECTR", "LVLOFFSETSPECTR",
-		"RMSLINEOFFSET"
+		"MINDBKNOWRMS", "MAXDBKNOBRMS", "SKEWEDPROPYRMS",
+		"FFTDATAINDEXRMS", "LVLOFFSETRMS", "LVLKNOBSPECTR",
+		"SKEWEDPROPYSPECTR", "LVLOFFSETSPECTR", "RMSLINEOFFSET"
 	};
 
 	using Attachment = juce::AudioProcessorValueTreeState::SliderAttachment;
@@ -585,6 +585,11 @@ private:
 				knobSlider->setSliderStyle(juce::Slider::SliderStyle::RotaryHorizontalVerticalDrag);
 				knobSlider->setTextBoxStyle(juce::Slider::TextBoxBelow, true, 100, 50);
 				addAndMakeVisible(myKnobs.add(knobSlider));
+
+				myLabels[i].setColour(juce::Label::ColourIds::textColourId, juce::Colours::white);
+				myLabels[i].setFont(20.0f);
+				myLabels[i].setJustificationType(juce::Justification::centred);
+				addAndMakeVisible(myLabels[i]);
 			}
 		}
 
@@ -595,6 +600,18 @@ private:
 
 		void resized() override
 		{
+			juce::Rectangle<int> bounds = getLocalBounds();
+
+			//Knob FlexBox system
+			setFlexBoxKnob(bounds);
+
+			//Label FlexBox system
+			setFlexBoxLabel(bounds);
+			
+		}
+
+		void setFlexBoxKnob(juce::Rectangle<int> bounds)
+		{
 			juce::FlexBox knobBox;
 			knobBox.flexWrap = juce::FlexBox::Wrap::wrap;
 			knobBox.justifyContent = juce::FlexBox::JustifyContent::spaceBetween;
@@ -602,18 +619,39 @@ private:
 			for (auto *k : myKnobs)
 				knobBox.items.add(juce::FlexItem(*k).withMinHeight(50.0f).withMinWidth(50.0f).withFlex(1));
 
-			//----------------------------------------------------------------------------------------------
-
 			juce::FlexBox fb;
 			fb.flexDirection = juce::FlexBox::Direction::row;
 
 			fb.items.add(juce::FlexItem(knobBox).withFlex(2.5f));
 
-			fb.performLayout(getLocalBounds().toFloat());
+			fb.performLayout(bounds);
+		}
+
+		void setFlexBoxLabel(juce::Rectangle<int> bounds)
+		{
+			juce::FlexBox labelBox;
+			labelBox.flexWrap = juce::FlexBox::Wrap::wrap;
+			labelBox.justifyContent = juce::FlexBox::JustifyContent::spaceBetween;
+
+			for (int i = 0; i < numKnobs; ++i)
+				labelBox.items.add(juce::FlexItem(myLabels[i]).withMinHeight(50.0f).withMinWidth(50.0f).withFlex(1));
+
+			juce::FlexBox fb2;
+			fb2.flexDirection = juce::FlexBox::Direction::row;
+
+			fb2.items.add(juce::FlexItem(labelBox).withFlex(2.5f));
+
+			fb2.performLayout(bounds.removeFromTop(30));
 		}
 
 		juce::Colour backgroundColour;
 		juce::OwnedArray<juce::Slider> myKnobs;
+		juce::Label myLabels[numKnobs]
+		{
+			{"Knob 1", "Knob 1"}, {"Knob 2", "Knob 2"}, {"Knob 3", "Knob 3"},
+			{"Knob 4", "Knob 4"}, {"Knob 5", "Knob 5"}, {"Knob 6", "Knob 6"},
+			{"Knob 7", "Knob 7"}, {"Knob 8", "Knob 8"}, {"RMS Offset", "RMS Offset"}
+		};
 	};
 
 	KnobManager mydBKnobs;

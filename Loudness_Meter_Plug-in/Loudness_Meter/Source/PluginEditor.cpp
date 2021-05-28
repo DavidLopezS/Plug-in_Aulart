@@ -47,7 +47,7 @@ void Loudness_MeterAudioProcessorEditor::resized()
 	using Track = juce::Grid::TrackInfo;
 	using Fr = juce::Grid::Fr;
 
-	grid.templateRows = { Track(Fr(2)), Track(Fr(1)), Track(Fr(1)) };
+	grid.templateRows = { Track(Fr(2)), Track(Fr(1)), Track(Fr(2)) };
 	grid.templateColumns = { Track(Fr(1)) };
 
 	grid.items = { juce::GridItem(gridRepresentation), juce::GridItem(spectrRMSSelector), juce::GridItem(mydBKnobs) };
