@@ -230,7 +230,7 @@ public:
 	SpectrogramAndRMSRep(Loudness_MeterAudioProcessor& p) : audioPrc(p), 
 															forwardFFT(audioPrc.fftOrder), spectrogramImage(juce::Image::RGB, 512, 512, true),
 															leftPathProducer(audioPrc.leftChannelFifo), rightPathProducer(audioPrc.rightChannelFifo),
-															lineColour(0), lvlKnobSpectr(4.1f), skPropSpectr(0.4f), lvlOffSpectr(3.9f)
+															lineColour(0), lvlKnobSpectr(0.00001f), skPropSpectr(0.2f), lvlOffSpectr(3.9f)
 	{
 		startTimerHz(30);//30
 	}
@@ -252,6 +252,7 @@ public:
 
 		if (isRMS)
 		{
+			repaint();
 			g.drawImage(backgroundRMS, getLocalBounds().toFloat());
 
 			auto leftChannelFFTPath = leftPathProducer.getPath();
@@ -271,6 +272,7 @@ public:
 		}
 		else
 		{
+			repaint();
 			g.drawImage(backgroundSpectr, getLocalBounds().toFloat());
 			g.drawImage(spectrogramImage, responseAreaSpectr.toFloat());
 		}
@@ -292,23 +294,23 @@ public:
 		auto bottomRMS = renderAreaRMS.getHeight();
 		auto widthRMS = renderAreaRMS.getWidth();
 
-		juce::Colour myColour;
+		auto myColour = juce::Colour(0u, 172u, 1u);
 
-		switch(lineColour)
-		{
-		case 0:
-			myColour = juce::Colour(0u, 172u, 1u);//Green
-			break;
-		case 1:
-			myColour = juce::Colour(243u, 26u, 26u);//Red
-			break;
-		case 2:
-			myColour = juce::Colour(26u, 229u, 243u);//Blue
-			break;
-		default: 
-			jassertfalse;
-			break;
-		}
+		//switch(lineColour)
+		//{
+		//case 0:
+		//	myColour = juce::Colour(0u, 172u, 1u);//Green
+		//	break;
+		//case 1:
+		//	myColour = juce::Colour(243u, 26u, 26u);//Red
+		//	break;
+		//case 2:
+		//	myColour = juce::Colour(26u, 229u, 243u);//Blue
+		//	break;
+		//default: 
+		//	jassertfalse;
+		//	break;
+		//}
 
 		RMSGrid(gRMS, renderAreaRMS, leftRMS, rightRMS, topRMS, bottomRMS, widthRMS, myColour);
 
@@ -438,10 +440,18 @@ public:
 		const int fontHeight = 10;
 		gSpectr.setFont(fontHeight);
 
+		for(auto fLines : freqSpectr)
+		{
+			auto y = juce::jmap(fLines, 20.0f, 20000.0f, float(bottomSpectr), float(topSpectr));
+			gSpectr.setColour(fLines == 15000.0f ? juce::Colour(0u, 172u, 1u) : juce::Colours::lightgrey);
+			gSpectr.drawHorizontalLine(y, leftSpectr, rightSpectr);
+		}
 
 		for (auto f : freqSpectr)
 		{
 			auto y = juce::jmap(f, 20.0f, 20000.0f, float(bottomSpectr), float(topSpectr));
+
+			gSpectr.setColour(f == 10000.0f ? juce::Colour(0u, 172u, 1u) : juce::Colours::lightgrey);
 
 			bool addK = false;
 			juce::String str;
@@ -463,7 +473,7 @@ public:
 			r.setX(getWidth() - textWidth);
 			r.setCentre(r.getCentreX(), y);
 
-			gSpectr.setColour(f == 0.0f ? juce::Colour(0u, 172u, 1u) : juce::Colours::lightgrey);
+			//gSpectr.setColour(f == 0.0f ? juce::Colour(0u, 172u, 1u) : juce::Colours::lightgrey);
 
 			gSpectr.drawFittedText(str, r, juce::Justification::centred, 1);
 
@@ -597,6 +607,46 @@ public:
 		lvlOffSpectr = lvlOffSpectrVar;
 	}
 
+	void switchSpectrogram(const int choice)
+	{
+		switch (choice)
+		{
+		case 0:
+			lvlKnobSpectr = 0.00001f;
+			skPropSpectr = 0.2f;
+			lvlOffSpectr = 2.9f;
+			break;
+		case 1:
+			lvlKnobSpectr = 4.1f;
+			skPropSpectr = 0.4f;
+			lvlOffSpectr = 3.9f;
+			break;
+		case 2:
+			lvlKnobSpectr = 2.1f;
+			skPropSpectr = 1.5f;
+			lvlOffSpectr = 5.5f;
+			break;
+		case 3:
+			lvlKnobSpectr = 0.002f;
+			skPropSpectr = 0.8f;
+			lvlOffSpectr = 0.2f;
+			break;
+		case 4:
+			lvlKnobSpectr = 0.05f;
+			skPropSpectr = 2.5f;
+			lvlOffSpectr = 4.0f;
+			break;
+		case 5:
+			lvlKnobSpectr = 3.5f;
+			skPropSpectr = 1.0f;
+			lvlOffSpectr = 4.5f;
+			break;
+		default:
+			jassertfalse;
+			break;
+		}
+	}
+
 private:
 	Loudness_MeterAudioProcessor& audioPrc;
 
@@ -657,7 +707,7 @@ private:
 				addAndMakeVisible(myKnobs.add(knobSlider));
 
 				myLabels[i].setColour(juce::Label::ColourIds::textColourId, juce::Colours::ghostwhite);
-				myLabels[i].setFont(15.0f);
+				myLabels[i].setFont(20.0f);
 				myLabels[i].setJustificationType(juce::Justification::centred);
 				addAndMakeVisible(myLabels[i]);
 			}
@@ -694,7 +744,7 @@ private:
 
 			fb.items.add(juce::FlexItem(knobBox).withFlex(2.5f));
 
-			fb.performLayout(bounds.removeFromBottom(170));
+			fb.performLayout(bounds.removeFromBottom(120));
 		}
 
 		void setFlexBoxLabel(juce::Rectangle<int> bounds)
@@ -711,7 +761,7 @@ private:
 
 			fb2.items.add(juce::FlexItem(labelBox).withFlex(2.5f));
 
-			fb2.performLayout(bounds.removeFromTop(30));
+			fb2.performLayout(bounds.removeFromTop(50));
 		}
 
 		juce::Colour backgroundColour;
@@ -726,11 +776,11 @@ private:
 	KnobManager mydBKnobs;
 	
 	//Spectr selector and attachment	
-	static constexpr auto numSelectors = 3;
+	static constexpr auto numSelectors = 4;
 
 	juce::String mySelectorNames[numSelectors]
 	{
-		"GRAFTYPE", "ORDERSWITCH", "COLOURGRIDSWITCH"
+		"GRAFTYPE", "ORDERSWITCH", "COLOURGRIDSWITCH", "GENRE"
 	};
 
 	using ComboBoxAttachment = juce::AudioProcessorValueTreeState::ComboBoxAttachment;
@@ -776,7 +826,8 @@ private:
 		juce::OwnedArray<juce::ComboBox> myComboBoxes;
 		juce::StringArray choices[numSelectors]
 		{
-			{ "RMS", "Spectrogram" }, { "Order 2048", "Order 4096", "Order 8192" }, { "Green", "Red", "Blue" }
+			{ "RMS", "Spectrogram" }, { "Order 2048", "Order 4096", "Order 8192" }, { "Green", "Red", "Blue" },
+			{ "----", "Techno", "House", "IDM", "EDM", "Downtempo" }
 		};
 	};
 
