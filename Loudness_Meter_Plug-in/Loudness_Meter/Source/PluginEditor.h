@@ -230,7 +230,7 @@ public:
 	SpectrogramAndRMSRep(Loudness_MeterAudioProcessor& p) : audioPrc(p), 
 															forwardFFT(audioPrc.fftOrder), spectrogramImage(juce::Image::RGB, 512, 512, true),
 															leftPathProducer(audioPrc.leftChannelFifo), rightPathProducer(audioPrc.rightChannelFifo),
-															lineColour(0)
+															lineColour(0), lvlKnobSpectr(4.1f), skPropSpectr(0.4f), lvlOffSpectr(3.9f)
 	{
 		startTimerHz(30);//30
 	}
@@ -560,13 +560,13 @@ public:
 
 		juce::Range<float> maxLevel = juce::FloatVectorOperations::findMinAndMax(audioPrc.fftData, audioPrc.fftSize / 2);
 		if (maxLevel.getEnd() == 0.0f)
-			maxLevel.setEnd(0.00001f);//4.1f
+			maxLevel.setEnd(lvlKnobSpectr);//0.00001f
 
 		for (int i = 1; i < imageHeight; ++i)
 		{
-			const float skewedProportionY = 1.0f - std::exp(std::log(i / (float)imageHeight) * 0.2f);//0.4f
+			const float skewedProportionY = 1.0f - std::exp(std::log(i / (float)imageHeight) * skPropSpectr);//0.2f
 			const int fftDataIndex = juce::jlimit(0, audioPrc.fftSize / 2, (int)(skewedProportionY * audioPrc.fftSize / 2));
-			const float level = juce::jmap(audioPrc.fftData[fftDataIndex], 0.0f, maxLevel.getEnd(), 0.0f, 1.0f);//Original targetRangeMax = 3.9f, needs to be tweaked/tested
+			const float level = juce::jmap(audioPrc.fftData[fftDataIndex], 0.0f, maxLevel.getEnd(), 0.0f, lvlOffSpectr);//Original targetRangeMax = 3.9f, needs to be tweaked/tested
 
 			spectrogramImage.setPixelAt(rightHandEdge, i, juce::Colour::fromHSL(level, 1.0f, level, 1.0f));//Colour::fromHSV
 		}
@@ -590,6 +590,13 @@ public:
 		lineColour = choiceColour;
 	}
 
+	void switchSpectrParams(float lvlKnobSpectrVar, float skrPropSpectrVar, float lvlOffSpectrVar)
+	{
+		lvlKnobSpectr = lvlKnobSpectrVar;
+		skPropSpectr = skrPropSpectrVar;
+		lvlOffSpectr = lvlOffSpectrVar;
+	}
+
 private:
 	Loudness_MeterAudioProcessor& audioPrc;
 
@@ -602,6 +609,9 @@ private:
 
 	bool isRMS = false;
 	int lineColour = 0;
+	float lvlKnobSpectr;
+	float skPropSpectr;
+	float lvlOffSpectr;
 };
 
 //==============================================================================
@@ -625,13 +635,11 @@ private:
     Loudness_MeterAudioProcessor& audioProcessor;
 
 	//Knobs attachment
-	static constexpr auto numKnobs = 9;
+	static constexpr auto numKnobs = 4;
 
 	juce::String myKnobName[numKnobs]
 	{
-		"MINDBKNOWRMS", "MAXDBKNOBRMS", "SKEWEDPROPYRMS",
-		"FFTDATAINDEXRMS", "LVLOFFSETRMS", "LVLKNOBSPECTR",
-		"SKEWEDPROPYSPECTR", "LVLOFFSETSPECTR", "RMSLINEOFFSET"
+		"LVLKNOBSPECTR", "SKEWEDPROPYSPECTR", "LVLOFFSETSPECTR", "RMSLINEOFFSET"
 	};
 
 	using Attachment = juce::AudioProcessorValueTreeState::SliderAttachment;
@@ -649,7 +657,7 @@ private:
 				addAndMakeVisible(myKnobs.add(knobSlider));
 
 				myLabels[i].setColour(juce::Label::ColourIds::textColourId, juce::Colours::ghostwhite);
-				myLabels[i].setFont(20.0f);
+				myLabels[i].setFont(15.0f);
 				myLabels[i].setJustificationType(juce::Justification::centred);
 				addAndMakeVisible(myLabels[i]);
 			}
@@ -686,7 +694,7 @@ private:
 
 			fb.items.add(juce::FlexItem(knobBox).withFlex(2.5f));
 
-			fb.performLayout(bounds);
+			fb.performLayout(bounds.removeFromBottom(170));
 		}
 
 		void setFlexBoxLabel(juce::Rectangle<int> bounds)
@@ -710,9 +718,8 @@ private:
 		juce::OwnedArray<juce::Slider> myKnobs;
 		juce::Label myLabels[numKnobs]
 		{
-			{"Knob 1", "Knob 1"}, {"Knob 2", "Knob 2"}, {"Knob 3", "Knob 3"},
-			{"Knob 4", "Knob 4"}, {"Knob 5", "Knob 5"}, {"Knob 6", "Knob 6"},
-			{"Knob 7", "Knob 7"}, {"Knob 8", "Knob 8"}, {"RMS Offset", "RMS Offset"}
+			{"Level Knob Spectr", "Level Knob Spectr"}, {"SK Proportion Y Spectr", "SK Proportion Y Spectr"}, 
+			{"Level Offset Spectr", "Level Offset Spectr"}, {"RMS Offset", "RMS Offset"}
 		};
 	};
 

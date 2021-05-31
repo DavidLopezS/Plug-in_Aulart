@@ -158,9 +158,9 @@ void Loudness_MeterAudioProcessor::processBlock (juce::AudioBuffer<float>& buffe
 	//auto &skPropRMS = *apvts.getRawParameterValue("SKEWEDPROPYRMS");
 	//auto &indexDataRMS = *apvts.getRawParameterValue("FFTDATAINDEXRMS");
 	//auto &lvlOffRMS = *apvts.getRawParameterValue("LVLOFFSETRMS");
-	//auto &lvlKnobSpectr = *apvts.getRawParameterValue("LVLKNOBSPECTR");
-	//auto &skPropSpectr = *apvts.getRawParameterValue("SKEWEDPROPYSPECTR");
-	//auto &lvlOffSpectr = *apvts.getRawParameterValue("LVLOFFSETSPECTR");
+	auto &lvlKnobSpectr = *apvts.getRawParameterValue("LVLKNOBSPECTR");
+	auto &skPropSpectr = *apvts.getRawParameterValue("SKEWEDPROPYSPECTR");
+	auto &lvlOffSpectr = *apvts.getRawParameterValue("LVLOFFSETSPECTR");
 
 	auto myRepData = dynamic_cast<Loudness_MeterAudioProcessorEditor*>(getActiveEditor());
 	if (myRepData != nullptr)
@@ -169,6 +169,7 @@ void Loudness_MeterAudioProcessor::processBlock (juce::AudioBuffer<float>& buffe
 		myRepData->gridRepresentation.changeRMSOffset(rmsLevelOffset);
 		myRepData->gridRepresentation.pathOrderChoice(orderSwitch);
 		myRepData->gridRepresentation.lineColourChoice(colourGridSwitch);
+		myRepData->gridRepresentation.switchSpectrParams(lvlKnobSpectr, skPropSpectr, lvlOffSpectr);
 	}
 }
 
@@ -224,7 +225,7 @@ juce::AudioProcessorValueTreeState::ParameterLayout Loudness_MeterAudioProcessor
 	std::vector<std::unique_ptr<juce::RangedAudioParameter>> params;
 
 	//Representation Switch
-	params.push_back(std::make_unique<juce::AudioParameterChoice>("GRAFTYPE", "Graf Type", juce::StringArray{ "RMS", "Spectrogram" }, 0));
+	params.push_back(std::make_unique<juce::AudioParameterChoice>("GRAFTYPE", "Graf Type", juce::StringArray{ "RMS", "Spectrogram" }, 1));
 
 	//Order Switch
 	params.push_back(std::make_unique<juce::AudioParameterChoice>("ORDERSWITCH", "Order Switch", juce::StringArray{ "Order 2048", "Order 4096", "Order 8192" }, 1));
