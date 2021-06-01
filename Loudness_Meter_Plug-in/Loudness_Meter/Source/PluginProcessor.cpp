@@ -171,7 +171,7 @@ void Loudness_MeterAudioProcessor::processBlock (juce::AudioBuffer<float>& buffe
 		myRepData->gridRepresentation.pathOrderChoice(orderSwitch);
 		myRepData->gridRepresentation.lineColourChoice(colourGridSwitch);
 		myRepData->gridRepresentation.switchSpectrParams(lvlKnobSpectr, skPropSpectr, lvlOffSpectr);
-		/*myRepData->gridRepresentation.switchSpectrogram(genreSelector);*/
+		myRepData->gridRepresentation.switchSpectrogram(genreSelector);
 	}
 }
 
