@@ -271,13 +271,16 @@ public:
 		}
 		else
 		{
-			for(int i = 0; i < myBackgrounds.size(); ++i)
+			g.drawImage(spectrogramImage, responseAreaSpectr.toFloat());
+			for each(auto background in myBackgrounds)
 			{
-				if (spectrGridChoice == i)
-					g.drawImage(myBackgrounds[i], getLocalBounds().toFloat());
+				if (spectrGridChoice == background.first)
+				{
+					g.drawImage(background.second, getLocalBounds().toFloat());
+				}
 			}
 			//g.drawImage(backgroundSpectr, getLocalBounds().toFloat());
-			g.drawImage(spectrogramImage, responseAreaSpectr.toFloat());
+
 		}
 
 		g.clipRegionIntersects(getLocalBounds());
@@ -330,78 +333,63 @@ public:
 		auto myColourSpectr = juce::Colour(0u, 172u, 1u);
 
 		//Frequencies Array Spectr
-		juce::Array<float> freqSpectr1;
-		juce::Array<float> freqSpectr2;
-		juce::Array<float> freqSpectr3;
-		juce::Array<float> freqSpectr4;
-		juce::Array<float> freqSpectr5;
-		juce::Array<float> freqSpectr6;
+
+		juce::Array<float> myFreqSpectrArray[] =  
+		{
+			{20, 5000, 10000, 15000, 20000},
+			{20, 6000, 9000, 15000, 20000},
+			{20, 4000, 17000, 20000},
+			{20, 300, 1000, 15000, 20000},
+			{50, 1000, 10000, 20000},
+			{20, 5000, 10000, 15000}
+		};
 
 		myBackgrounds =
 		{
-		{0, juce::Image(juce::Image::PixelFormat::RGB, getWidth(), getHeight(), true)},
-		{1, juce::Image(juce::Image::PixelFormat::RGB, getWidth(), getHeight(), true)},
-		{2, juce::Image(juce::Image::PixelFormat::RGB, getWidth(), getHeight(), true)},
-		{3, juce::Image(juce::Image::PixelFormat::RGB, getWidth(), getHeight(), true)},
-		{4, juce::Image(juce::Image::PixelFormat::RGB, getWidth(), getHeight(), true)},
-		{5, juce::Image(juce::Image::PixelFormat::RGB, getWidth(), getHeight(), true)}
+			{0, juce::Image(juce::Image::PixelFormat::RGB, getWidth(), getHeight(), true)},
+			{1, juce::Image(juce::Image::PixelFormat::RGB, getWidth(), getHeight(), true)},
+			{2, juce::Image(juce::Image::PixelFormat::RGB, getWidth(), getHeight(), true)},
+			{3, juce::Image(juce::Image::PixelFormat::RGB, getWidth(), getHeight(), true)},
+			{4, juce::Image(juce::Image::PixelFormat::RGB, getWidth(), getHeight(), true)},
+			{5, juce::Image(juce::Image::PixelFormat::RGB, getWidth(), getHeight(), true)}
 		};
+
+		for each (auto background in myBackgrounds)
+		{
+			myGraphics.emplace(background.first, &juce::Graphics(background.second));
+		}
 
 		switch(spectrGridChoice)
 		{
 		case 0:
 			//freqSpectr.clear();
-			freqSpectr1 =
-			{
-				20, 5000, 10000, 15000, 20000
-			};
 			
-			spectrGrid(freqSpectr1, myBackgrounds[0], renderAreaSpectr, leftSpectr, rightSpectr, topSpectr, bottomSpectr, widthSpectr, myColourSpectr);
+			spectrGrid(myFreqSpectrArray[spectrGridChoice], myBackgrounds[spectrGridChoice], renderAreaSpectr, leftSpectr, rightSpectr, topSpectr, bottomSpectr, widthSpectr, myColourSpectr);
 			break;
 		case 1:
 			//freqSpectr.clear();
-			freqSpectr2 =
-			{
-				20, 6000, 9000, 15000, 20000
-			};
 
-			spectrGrid(freqSpectr2, myBackgrounds[1], renderAreaSpectr, leftSpectr, rightSpectr, topSpectr, bottomSpectr, widthSpectr, myColourSpectr);
+			spectrGrid(myFreqSpectrArray[spectrGridChoice], myBackgrounds[spectrGridChoice], renderAreaSpectr, leftSpectr, rightSpectr, topSpectr, bottomSpectr, widthSpectr, myColourSpectr);
 			break;
 		case 2:
 			//freqSpectr.clear();
-			freqSpectr3 =
-			{
-				20, 4000, 17000, 20000
-			};
 
-			spectrGrid(freqSpectr3, myBackgrounds[2], renderAreaSpectr, leftSpectr, rightSpectr, topSpectr, bottomSpectr, widthSpectr, myColourSpectr);
+			spectrGrid(myFreqSpectrArray[spectrGridChoice], myBackgrounds[spectrGridChoice], renderAreaSpectr, leftSpectr, rightSpectr, topSpectr, bottomSpectr, widthSpectr, myColourSpectr);
 			break;
 		case 3:
 			//freqSpectr.clear();
-			freqSpectr4 =
-			{
-				20, 300, 1000, 15000, 20000
-			};
 
-			spectrGrid(freqSpectr4, myBackgrounds[3], renderAreaSpectr, leftSpectr, rightSpectr, topSpectr, bottomSpectr, widthSpectr, myColourSpectr);
+			spectrGrid(myFreqSpectrArray[spectrGridChoice], myBackgrounds[spectrGridChoice], renderAreaSpectr, leftSpectr, rightSpectr, topSpectr, bottomSpectr, widthSpectr, myColourSpectr);
 			break;
 		case 4:
 			//freqSpectr.clear();
-			freqSpectr5 =
-			{
-				50, 1000, 10000, 20000
-			};
 
-			spectrGrid(freqSpectr5, myBackgrounds[4], renderAreaSpectr, leftSpectr, rightSpectr, topSpectr, bottomSpectr, widthSpectr, myColourSpectr);
+			spectrGrid(myFreqSpectrArray[spectrGridChoice], myBackgrounds[spectrGridChoice], renderAreaSpectr, leftSpectr, rightSpectr, topSpectr, bottomSpectr, widthSpectr, myColourSpectr);
 			break;
 		case 5:
 			//freqSpectr.clear();
-			freqSpectr6 =
-			{
-				20, 5000, 10000, 15000
-			};
 
-			spectrGrid(freqSpectr6, myBackgrounds[5], renderAreaSpectr, leftSpectr, rightSpectr, topSpectr, bottomSpectr, widthSpectr, myColourSpectr);
+			spectrGrid(myFreqSpectrArray[spectrGridChoice], myBackgrounds[spectrGridChoice], renderAreaSpectr, leftSpectr, rightSpectr, topSpectr, bottomSpectr, widthSpectr, myColourSpectr);
 			break;
 		default:
 			jassertfalse;
@@ -414,6 +402,9 @@ public:
 	void RMSGrid(juce::Array<float> freqRMS, juce::Array<float> gain, juce::Image imageRMS, juce::Rectangle<int> renderAreaRMS, int leftRMS, int rightRMS, int topRMS, int bottomRMS, int widthRMS, juce::Colour myColour)
 	{
 		juce::Graphics gRMS(imageRMS);
+
+		for(int i = 0; i < freqRMS.size(); ++i)
+			DBG("My Array values: " + (juce::String)freqRMS[i]);
 
 		//lines representation
 		juce::Array<float> xPos;
@@ -731,6 +722,7 @@ private:
 	juce::Image backgroundRMS, backgroundSpectr;
 
 	std::map<int, juce::Image> myBackgrounds;
+	std::map<int, juce::Graphics*> myGraphics;
 
 	PathProducer leftPathProducer, rightPathProducer;
 
