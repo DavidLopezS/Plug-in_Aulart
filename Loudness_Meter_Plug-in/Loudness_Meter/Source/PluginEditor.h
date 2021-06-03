@@ -359,44 +359,9 @@ public:
 			myGraphics.emplace(background.first, &juce::Graphics(background.second));
 		}
 
-		switch(spectrGridChoice)
-		{
-		case 0:
-			//freqSpectr.clear();
-			
-			spectrGrid(myFreqSpectrArray[spectrGridChoice], myBackgrounds[spectrGridChoice], renderAreaSpectr, leftSpectr, rightSpectr, topSpectr, bottomSpectr, widthSpectr, myColourSpectr);
-			break;
-		case 1:
-			//freqSpectr.clear();
+		for each(auto background in myBackgrounds)
+			spectrGrid(myFreqSpectrArray[background.first], background.second, renderAreaSpectr, leftSpectr, rightSpectr, topSpectr, bottomSpectr, widthSpectr, myColourSpectr);
 
-			spectrGrid(myFreqSpectrArray[spectrGridChoice], myBackgrounds[spectrGridChoice], renderAreaSpectr, leftSpectr, rightSpectr, topSpectr, bottomSpectr, widthSpectr, myColourSpectr);
-			break;
-		case 2:
-			//freqSpectr.clear();
-
-			spectrGrid(myFreqSpectrArray[spectrGridChoice], myBackgrounds[spectrGridChoice], renderAreaSpectr, leftSpectr, rightSpectr, topSpectr, bottomSpectr, widthSpectr, myColourSpectr);
-			break;
-		case 3:
-			//freqSpectr.clear();
-
-			spectrGrid(myFreqSpectrArray[spectrGridChoice], myBackgrounds[spectrGridChoice], renderAreaSpectr, leftSpectr, rightSpectr, topSpectr, bottomSpectr, widthSpectr, myColourSpectr);
-			break;
-		case 4:
-			//freqSpectr.clear();
-
-			spectrGrid(myFreqSpectrArray[spectrGridChoice], myBackgrounds[spectrGridChoice], renderAreaSpectr, leftSpectr, rightSpectr, topSpectr, bottomSpectr, widthSpectr, myColourSpectr);
-			break;
-		case 5:
-			//freqSpectr.clear();
-
-			spectrGrid(myFreqSpectrArray[spectrGridChoice], myBackgrounds[spectrGridChoice], renderAreaSpectr, leftSpectr, rightSpectr, topSpectr, bottomSpectr, widthSpectr, myColourSpectr);
-			break;
-		default:
-			jassertfalse;
-			break;
-		}
-
-		//spectrGrid(freqSpectr, backgroundSpectr, renderAreaSpectr, leftSpectr, rightSpectr, topSpectr, bottomSpectr, widthSpectr, myColourSpectr);
 	}
 
 	void RMSGrid(juce::Array<float> freqRMS, juce::Array<float> gain, juce::Image imageRMS, juce::Rectangle<int> renderAreaRMS, int leftRMS, int rightRMS, int topRMS, int bottomRMS, int widthRMS, juce::Colour myColour)
