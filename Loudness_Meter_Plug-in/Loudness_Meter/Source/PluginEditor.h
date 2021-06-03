@@ -237,7 +237,7 @@ public:
 	~SpectrogramAndRMSRep()
 	{
 		stopTimer();
-		myBackgrounds.clear();
+		myBackgroundsSpectr.clear();
 	}
 
 	void paint(juce::Graphics& g) override
@@ -252,7 +252,13 @@ public:
 
 		if (isRMS)
 		{
-			g.drawImage(backgroundRMS, getLocalBounds().toFloat());
+			//g.drawImage(backgroundRMS, getLocalBounds().toFloat());
+
+			for each(auto backround in myBackgroundsRMS)
+			{
+				if (rmsGridChoice == backround.first)
+					g.drawImage(backround.second, getLocalBounds().toFloat());
+			}
 
 			auto leftChannelFFTPath = leftPathProducer.getPath();
 			auto rightChannelFFTPath = rightPathProducer.getPath();
@@ -271,26 +277,21 @@ public:
 		}
 		else
 		{
-			g.drawImage(spectrogramImage, responseAreaSpectr.toFloat());
-			for each(auto background in myBackgrounds)
+			for each(auto background in myBackgroundsSpectr)
 			{
 				if (spectrGridChoice == background.first)
 				{
 					g.drawImage(background.second, getLocalBounds().toFloat());
 				}
 			}
-			//g.drawImage(backgroundSpectr, getLocalBounds().toFloat());
-
+			g.drawImage(spectrogramImage, responseAreaSpectr.toFloat());
 		}
 
 		g.clipRegionIntersects(getLocalBounds());
 	}
 
 	void resized() override
-	{
-		//RMS grid
-		backgroundRMS = juce::Image(juce::Image::PixelFormat::RGB, getWidth(), getHeight(), true);
-		
+	{	
 		//RMS area spaces 
 		auto renderAreaRMS = getAnalysisAreaRMS();
 		auto leftRMS = renderAreaRMS.getX();
@@ -301,13 +302,16 @@ public:
 		
 		//RMS Colour
 		auto myColourRMS = juce::Colour(0u, 172u, 1u);//Green
-		
-		//Frequencies Array RMS
-		juce::Array<float> freqRMS
+
+		juce::Array<float> myFreqRMSArray[] =
 		{
-			20, 50, 100,
-			200, 500, 1000,
-			2000, 5000, 10000, 20000
+			{ 20, 50, 100, 200, 500, 1000, 2000, 5000, 10000, 20000 },
+			{ 20, 60, 300, 400, 600, 2000, 3000, 6000, 90000, 20000 },
+			{ 20, 20000 },
+			{ 20, 50, 500, 5000, 20000 },
+			{ 20, 10, 100, 1000, 10000, 20000 },
+			{ 20, 200, 2000, 20000 },
+			{ 20, 30, 300, 3000, 10000, 20000 }
 		};
 
 		//Gain Array
@@ -316,10 +320,18 @@ public:
 			-24, -12, 0, 12, 24
 		};
 
-		RMSGrid(freqRMS, gain, backgroundRMS, renderAreaRMS, leftRMS, rightRMS, topRMS, bottomRMS, widthRMS, myColourRMS);
+		myBackgroundsRMS =
+		{
+			{0, juce::Image(juce::Image::PixelFormat::RGB, getWidth(), getHeight(), true)},
+			{1, juce::Image(juce::Image::PixelFormat::RGB, getWidth(), getHeight(), true)},
+			{2, juce::Image(juce::Image::PixelFormat::RGB, getWidth(), getHeight(), true)},
+			{3, juce::Image(juce::Image::PixelFormat::RGB, getWidth(), getHeight(), true)},
+			{4, juce::Image(juce::Image::PixelFormat::RGB, getWidth(), getHeight(), true)},
+			{5, juce::Image(juce::Image::PixelFormat::RGB, getWidth(), getHeight(), true)}
+		};
 
-		//Spectr Grid
-		//backgroundSpectr = juce::Image(juce::Image::PixelFormat::RGB, getWidth(), getHeight(), true);
+		for each (auto background in myBackgroundsRMS)
+			RMSGrid(myFreqRMSArray[background.first], gain, background.second, renderAreaRMS, leftRMS, rightRMS, topRMS, bottomRMS, widthRMS, myColourRMS);
 
 		//Spectr area spaces 
 		auto renderAreaSpectr = getAnalysisAreaSpectr();
@@ -344,7 +356,7 @@ public:
 			{20, 5000, 10000, 15000}
 		};
 
-		myBackgrounds =
+		myBackgroundsSpectr =
 		{
 			{0, juce::Image(juce::Image::PixelFormat::RGB, getWidth(), getHeight(), true)},
 			{1, juce::Image(juce::Image::PixelFormat::RGB, getWidth(), getHeight(), true)},
@@ -354,14 +366,8 @@ public:
 			{5, juce::Image(juce::Image::PixelFormat::RGB, getWidth(), getHeight(), true)}
 		};
 
-		for each (auto background in myBackgrounds)
-		{
-			myGraphics.emplace(background.first, &juce::Graphics(background.second));
-		}
-
-		for each(auto background in myBackgrounds)
+		for each(auto background in myBackgroundsSpectr)
 			spectrGrid(myFreqSpectrArray[background.first], background.second, renderAreaSpectr, leftSpectr, rightSpectr, topSpectr, bottomSpectr, widthSpectr, myColourSpectr);
-
 	}
 
 	void RMSGrid(juce::Array<float> freqRMS, juce::Array<float> gain, juce::Image imageRMS, juce::Rectangle<int> renderAreaRMS, int leftRMS, int rightRMS, int topRMS, int bottomRMS, int widthRMS, juce::Colour myColour)
@@ -640,37 +646,65 @@ public:
 			lvlKnobSpectr = 0.00001f;
 			skPropSpectr = 0.2f;
 			lvlOffSpectr = 2.9f;
-			spectrGridChoice = 0;
+			spectrGridChoice = choice;
 			break;
 		case 1:
 			lvlKnobSpectr = 4.1f;
 			skPropSpectr = 0.4f;
 			lvlOffSpectr = 3.9f;
-			spectrGridChoice = 1;
+			spectrGridChoice = choice;
 			break;
 		case 2:
 			lvlKnobSpectr = 2.1f;
 			skPropSpectr = 1.5f;
 			lvlOffSpectr = 5.5f;
-			spectrGridChoice = 2;
+			spectrGridChoice = choice;
 			break;
 		case 3:
 			lvlKnobSpectr = 0.002f;
 			skPropSpectr = 0.8f;
 			lvlOffSpectr = 0.2f;
-			spectrGridChoice = 3;
+			spectrGridChoice = choice;
 			break;
 		case 4:
 			lvlKnobSpectr = 0.05f;
 			skPropSpectr = 2.5f;
 			lvlOffSpectr = 4.0f;
-			spectrGridChoice = 4;
+			spectrGridChoice = choice;
 			break;
 		case 5:
 			lvlKnobSpectr = 3.5f;
 			skPropSpectr = 1.0f;
 			lvlOffSpectr = 4.5f;
-			spectrGridChoice = 5;
+			spectrGridChoice = choice;
+			break;
+		default:
+			jassertfalse;
+			break;
+		}
+	}
+
+	void switchRMS(const int choice)
+	{
+		switch(choice)
+		{
+		case 0:
+			rmsGridChoice = choice;
+			break;
+		case 1:
+			rmsGridChoice = choice;
+			break;
+		case 2:
+			rmsGridChoice = choice;
+			break;
+		case 3:
+			rmsGridChoice = choice;
+			break;
+		case 4:
+			rmsGridChoice = choice;
+			break;
+		case 5:
+			rmsGridChoice = choice;
 			break;
 		default:
 			jassertfalse;
@@ -684,16 +718,17 @@ private:
 	juce::dsp::FFT forwardFFT;
 	juce::Image spectrogramImage;
 
-	juce::Image backgroundRMS, backgroundSpectr;
+	//juce::Image backgroundRMS, backgroundSpectr;
 
-	std::map<int, juce::Image> myBackgrounds;
-	std::map<int, juce::Graphics*> myGraphics;
+	std::map<int, juce::Image> myBackgroundsSpectr;
+	std::map<int, juce::Image> myBackgroundsRMS;
 
 	PathProducer leftPathProducer, rightPathProducer;
 
 	bool isRMS = false;
 	int lineColour = 0;
-	int spectrGridChoice = 0;
+	int spectrGridChoice = 0;	
+	int rmsGridChoice = 0;
 	float lvlKnobSpectr = 0.00001f;
 	float skPropSpectr = 0.2f;
 	float lvlOffSpectr = 3.9f;
@@ -811,11 +846,11 @@ private:
 	KnobManager mydBKnobs;
 	
 	//Spectr selector and attachment	
-	static constexpr auto numSelectors = 4;
+	static constexpr auto numSelectors = 5;
 
 	juce::String mySelectorNames[numSelectors]
 	{
-		"GRAFTYPE", "ORDERSWITCH", "COLOURGRIDSWITCH", "GENRE"
+		"GRAFTYPE", "ORDERSWITCH", "COLOURGRIDSWITCH", "GENRE", "GENRERMS"
 	};
 
 	using ComboBoxAttachment = juce::AudioProcessorValueTreeState::ComboBoxAttachment;
@@ -862,7 +897,7 @@ private:
 		juce::StringArray choices[numSelectors]
 		{
 			{ "RMS", "Spectrogram" }, { "Order 2048", "Order 4096", "Order 8192" }, { "Green", "Red", "Blue" },
-			{ "----", "Techno", "House", "IDM", "EDM", "Downtempo" }
+			{ "Spectrogram", "Techno", "House", "IDM", "EDM", "Downtempo" }, { "RMS", "Techno", "House", "IDM", "EDM", "Downtempo" }
 		};
 	};
 

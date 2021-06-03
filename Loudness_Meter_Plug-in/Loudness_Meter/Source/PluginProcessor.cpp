@@ -153,7 +153,8 @@ void Loudness_MeterAudioProcessor::processBlock (juce::AudioBuffer<float>& buffe
 	auto &orderSwitch = *apvts.getRawParameterValue("ORDERSWITCH");
 	auto &colourGridSwitch = *apvts.getRawParameterValue("COLOURGRIDSWITCH");
 	auto &rmsLevelOffset = *apvts.getRawParameterValue("RMSLINEOFFSET");
-	auto &genreSelector = *apvts.getRawParameterValue("GENRE");
+	auto &genreSelectorSpectr = *apvts.getRawParameterValue("GENRE");	
+	auto &genreSelectorRMS = *apvts.getRawParameterValue("GENRERMS");
 	//auto &maxRMSdB = *apvts.getRawParameterValue("MAXDBKNOBRMS");
 	//auto &minRMSdB = *apvts.getRawParameterValue("MINDBKNOWRMS");
 	//auto &skPropRMS = *apvts.getRawParameterValue("SKEWEDPROPYRMS");
@@ -171,7 +172,8 @@ void Loudness_MeterAudioProcessor::processBlock (juce::AudioBuffer<float>& buffe
 		myRepData->gridRepresentation.pathOrderChoice(orderSwitch);
 		myRepData->gridRepresentation.lineColourChoice(colourGridSwitch);
 		myRepData->gridRepresentation.switchSpectrParams(lvlKnobSpectr, skPropSpectr, lvlOffSpectr);
-		myRepData->gridRepresentation.switchSpectrogram(genreSelector);
+		myRepData->gridRepresentation.switchSpectrogram(genreSelectorSpectr);
+		myRepData->gridRepresentation.switchRMS(genreSelectorRMS);
 	}
 }
 
@@ -227,7 +229,7 @@ juce::AudioProcessorValueTreeState::ParameterLayout Loudness_MeterAudioProcessor
 	std::vector<std::unique_ptr<juce::RangedAudioParameter>> params;
 
 	//Representation Switch
-	params.push_back(std::make_unique<juce::AudioParameterChoice>("GRAFTYPE", "Graf Type", juce::StringArray{ "RMS", "Spectrogram" }, 1));
+	params.push_back(std::make_unique<juce::AudioParameterChoice>("GRAFTYPE", "Graf Type", juce::StringArray{ "RMS", "Spectrogram" }, 0));
 
 	//Order Switch
 	params.push_back(std::make_unique<juce::AudioParameterChoice>("ORDERSWITCH", "Order Switch", juce::StringArray{ "Order 2048", "Order 4096", "Order 8192" }, 1));
@@ -236,7 +238,10 @@ juce::AudioProcessorValueTreeState::ParameterLayout Loudness_MeterAudioProcessor
 	params.push_back(std::make_unique<juce::AudioParameterChoice>("COLOURGRIDSWITCH", "Colour Grid Switch", juce::StringArray{ "Green", "Red", "Blue" }, 0));
 
 	//Genre Selector
-	params.push_back(std::make_unique <juce::AudioParameterChoice>("GENRE", "Genre", juce::StringArray{ "----", "Techno", "House", "IDM", "EDM", "Downtempo" }, 0));
+	params.push_back(std::make_unique <juce::AudioParameterChoice>("GENRE", "Genre", juce::StringArray{ "Spectrogram", "Techno", "House", "IDM", "EDM", "Downtempo" }, 0));	//Genre Selector
+	
+	//Genre Selector
+	params.push_back(std::make_unique <juce::AudioParameterChoice>("GENRERMS", "Genre RMS", juce::StringArray{ "RMS", "Techno", "House", "IDM", "EDM", "Downtempo" }, 0));
 
 	//Max db Knob RMS
 	params.push_back(std::make_unique<juce::AudioParameterFloat>("MAXDBKNOBRMS", "Max db Knob RMS", juce::NormalisableRange<float>{0.0f, 100.0f, 0.1f}, 0.0f));
