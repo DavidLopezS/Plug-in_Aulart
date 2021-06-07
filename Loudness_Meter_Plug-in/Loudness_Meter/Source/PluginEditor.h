@@ -324,7 +324,7 @@ public:
 		auto widthSpectr = renderAreaSpectr.getWidth();
 		
 		//Spectr Colour
-		auto myColourSpectr = juce::Colour(0u, 172u, 1u);
+		auto myColourSpectr = juce::Colour(255u, 41u, 41u);
 
 		//Frequencies Array Spectr
 
