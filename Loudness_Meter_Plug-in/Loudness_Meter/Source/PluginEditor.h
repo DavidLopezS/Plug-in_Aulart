@@ -186,25 +186,6 @@ public:
 
 	void process(juce::Rectangle<float> fftBounds, double sampleRate);
 	juce::Path getPath() { return leftChannelFFTPath; }
-	
-	//void fftOrderSwitch(const int orderChoice)
-	//{
-	//	switch (orderChoice)
-	//	{
-	//	case 0:
-	//		leftChannelFFTDataGenerator.changeOrder(FFTOrder::order2048);
-	//		break;
-	//	case 1:
-	//		leftChannelFFTDataGenerator.changeOrder(FFTOrder::order4096);
-	//		break;
-	//	case 2:
-	//		leftChannelFFTDataGenerator.changeOrder(FFTOrder::order8192);
-	//		break;
-	//	default:
-	//		jassertfalse;
-	//		break;
-	//	}
-	//}
 
 	int orderChoice;
 	float offsetRMS;
@@ -228,7 +209,7 @@ struct SpectrogramAndRMSRep : public juce::Component, private juce::Timer
 public:
 
 	SpectrogramAndRMSRep(Loudness_MeterAudioProcessor& p) : audioPrc(p), 
-															forwardFFT(audioPrc.fftOrder), spectrogramImage(juce::Image::RGB, 512, 512, true),
+															forwardFFT(audioPrc.fftOrder), spectrogramImage(juce::Image::ARGB, 512, 512, true),
 															leftPathProducer(audioPrc.leftChannelFifo), rightPathProducer(audioPrc.rightChannelFifo)
 	{
 		startTimerHz(30);//30
@@ -238,6 +219,7 @@ public:
 	{
 		stopTimer();
 		myBackgroundsSpectr.clear();
+		myBackgroundsRMS.clear();
 	}
 
 	void paint(juce::Graphics& g) override
@@ -252,7 +234,6 @@ public:
 
 		if (isRMS)
 		{
-			//g.drawImage(backgroundRMS, getLocalBounds().toFloat());
 
 			for each(auto backround in myBackgroundsRMS)
 			{
@@ -277,6 +258,8 @@ public:
 		}
 		else
 		{
+			g.drawImage(spectrogramImage, responseAreaSpectr.toFloat());
+
 			for each(auto background in myBackgroundsSpectr)
 			{
 				if (spectrGridChoice == background.first)
@@ -284,7 +267,6 @@ public:
 					g.drawImage(background.second, getLocalBounds().toFloat());
 				}
 			}
-			g.drawImage(spectrogramImage, responseAreaSpectr.toFloat());
 		}
 
 		g.clipRegionIntersects(getLocalBounds());
@@ -358,24 +340,26 @@ public:
 
 		myBackgroundsSpectr =
 		{
-			{0, juce::Image(juce::Image::PixelFormat::RGB, getWidth(), getHeight(), true)},
-			{1, juce::Image(juce::Image::PixelFormat::RGB, getWidth(), getHeight(), true)},
-			{2, juce::Image(juce::Image::PixelFormat::RGB, getWidth(), getHeight(), true)},
-			{3, juce::Image(juce::Image::PixelFormat::RGB, getWidth(), getHeight(), true)},
-			{4, juce::Image(juce::Image::PixelFormat::RGB, getWidth(), getHeight(), true)},
-			{5, juce::Image(juce::Image::PixelFormat::RGB, getWidth(), getHeight(), true)}
+			{0, juce::Image(juce::Image::PixelFormat::ARGB, getWidth(), getHeight(), true)},
+			{1, juce::Image(juce::Image::PixelFormat::ARGB, getWidth(), getHeight(), true)},
+			{2, juce::Image(juce::Image::PixelFormat::ARGB, getWidth(), getHeight(), true)},
+			{3, juce::Image(juce::Image::PixelFormat::ARGB, getWidth(), getHeight(), true)},
+			{4, juce::Image(juce::Image::PixelFormat::ARGB, getWidth(), getHeight(), true)},
+			{5, juce::Image(juce::Image::PixelFormat::ARGB, getWidth(), getHeight(), true)}
+		};
+
+		juce::Array<float> dbToBeColored = 
+		{
+			10000, 6000, 17000, 15000, 1000, 15000
 		};
 
 		for each(auto background in myBackgroundsSpectr)
-			spectrGrid(myFreqSpectrArray[background.first], background.second, renderAreaSpectr, leftSpectr, rightSpectr, topSpectr, bottomSpectr, widthSpectr, myColourSpectr);
+			spectrGrid(myFreqSpectrArray[background.first], background.second, renderAreaSpectr, leftSpectr, rightSpectr, topSpectr, bottomSpectr, widthSpectr, myColourSpectr, dbToBeColored[background.first]);
 	}
 
 	void RMSGrid(juce::Array<float> freqRMS, juce::Array<float> gain, juce::Image imageRMS, juce::Rectangle<int> renderAreaRMS, int leftRMS, int rightRMS, int topRMS, int bottomRMS, int widthRMS, juce::Colour myColour)
 	{
 		juce::Graphics gRMS(imageRMS);
-
-		for(int i = 0; i < freqRMS.size(); ++i)
-			DBG("My Array values: " + (juce::String)freqRMS[i]);
 
 		//lines representation
 		juce::Array<float> xPos;
@@ -462,7 +446,7 @@ public:
 		}
 	}
 
-	void spectrGrid(juce::Array<float> freqSpectr, juce::Image spectrImage, juce::Rectangle<int> renderAreaSpectr, int leftSpectr, int rightSpectr, int topSpectr, int bottomSpectr, int widthSpectr, juce::Colour myColour)
+	void spectrGrid(juce::Array<float> freqSpectr, juce::Image spectrImage, juce::Rectangle<int> renderAreaSpectr, int leftSpectr, int rightSpectr, int topSpectr, int bottomSpectr, int widthSpectr, juce::Colour myColour, float numToBeColored)
 	{
 		juce::Graphics gSpectr(spectrImage);
 
@@ -474,7 +458,7 @@ public:
 		for(auto fLines : freqSpectr)
 		{
 			auto y = juce::jmap(fLines, 20.0f, 20000.0f, float(bottomSpectr), float(topSpectr));
-			gSpectr.setColour(fLines == 15000.0f ? myColour : juce::Colours::lightgrey);
+			gSpectr.setColour(fLines == numToBeColored ? myColour : juce::Colours::lightgrey);
 			gSpectr.drawHorizontalLine(y, leftSpectr, rightSpectr);
 		}
 
@@ -482,7 +466,7 @@ public:
 		{
 			auto y = juce::jmap(f, 20.0f, 20000.0f, float(bottomSpectr), float(topSpectr));
 
-			gSpectr.setColour(f == 10000.0f ? myColour : juce::Colours::lightgrey);
+			gSpectr.setColour(f == numToBeColored ? myColour : juce::Colours::lightgrey);
 
 			bool addK = false;
 			juce::String str;
@@ -717,8 +701,6 @@ private:
 
 	juce::dsp::FFT forwardFFT;
 	juce::Image spectrogramImage;
-
-	//juce::Image backgroundRMS, backgroundSpectr;
 
 	std::map<int, juce::Image> myBackgroundsSpectr;
 	std::map<int, juce::Image> myBackgroundsRMS;
