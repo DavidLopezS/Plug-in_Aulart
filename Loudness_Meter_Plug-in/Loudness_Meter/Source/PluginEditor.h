@@ -619,11 +619,6 @@ public:
 		rightPathProducer.orderChoice = choice;
 	}
 
-	void lineColourChoice(const int choiceColour)
-	{
-		lineColour = choiceColour;
-	}
-
 	void switchSpectrParams(float lvlKnobSpectrVar, float skrPropSpectrVar, float lvlOffSpectrVar)
 	{
 		lvlKnobSpectr = lvlKnobSpectrVar;
@@ -717,7 +712,6 @@ private:
 	PathProducer leftPathProducer, rightPathProducer;
 
 	bool isRMS = false;
-	int lineColour = 0;
 	int spectrGridChoice = 0;	
 	int rmsGridChoice = 0;
 	float lvlKnobSpectr = 0.00001f;

@@ -155,11 +155,6 @@ void Loudness_MeterAudioProcessor::processBlock (juce::AudioBuffer<float>& buffe
 	auto &rmsLevelOffset = *apvts.getRawParameterValue("RMSLINEOFFSET");
 	auto &genreSelectorSpectr = *apvts.getRawParameterValue("GENRE");	
 	auto &genreSelectorRMS = *apvts.getRawParameterValue("GENRERMS");
-	//auto &maxRMSdB = *apvts.getRawParameterValue("MAXDBKNOBRMS");
-	//auto &minRMSdB = *apvts.getRawParameterValue("MINDBKNOWRMS");
-	//auto &skPropRMS = *apvts.getRawParameterValue("SKEWEDPROPYRMS");
-	//auto &indexDataRMS = *apvts.getRawParameterValue("FFTDATAINDEXRMS");
-	//auto &lvlOffRMS = *apvts.getRawParameterValue("LVLOFFSETRMS");
 	auto &lvlKnobSpectr = *apvts.getRawParameterValue("LVLKNOBSPECTR");
 	auto &skPropSpectr = *apvts.getRawParameterValue("SKEWEDPROPYSPECTR");	
 	auto &lvlOffSpectr = *apvts.getRawParameterValue("LVLOFFSETSPECTR");
@@ -170,7 +165,6 @@ void Loudness_MeterAudioProcessor::processBlock (juce::AudioBuffer<float>& buffe
 		myRepData->gridRepresentation.selGrid(graftOutputType);
 		myRepData->gridRepresentation.changeRMSOffset(rmsLevelOffset);
 		myRepData->gridRepresentation.pathOrderChoice(orderSwitch);
-		myRepData->gridRepresentation.lineColourChoice(colourGridSwitch);
 		myRepData->gridRepresentation.switchSpectrParams(lvlKnobSpectr, skPropSpectr, lvlOffSpectr);
 		myRepData->gridRepresentation.switchSpectrogram(genreSelectorSpectr);
 		myRepData->gridRepresentation.switchRMS(genreSelectorRMS);
@@ -242,21 +236,6 @@ juce::AudioProcessorValueTreeState::ParameterLayout Loudness_MeterAudioProcessor
 	
 	//Genre Selector
 	params.push_back(std::make_unique <juce::AudioParameterChoice>("GENRERMS", "Genre RMS", juce::StringArray{ "RMS", "Techno", "House", "IDM", "EDM", "Downtempo" }, 0));
-
-	//Max db Knob RMS
-	params.push_back(std::make_unique<juce::AudioParameterFloat>("MAXDBKNOBRMS", "Max db Knob RMS", juce::NormalisableRange<float>{0.0f, 100.0f, 0.1f}, 0.0f));
-
-	//Min db Knob RMS
-	params.push_back(std::make_unique<juce::AudioParameterFloat>("MINDBKNOWRMS", "Min db Knob RMS", juce::NormalisableRange<float>{-100.0f, -1.0f, 0.1f}, -100.0f));
-
-	//Skewed Proportion Y RMS
-	params.push_back(std::make_unique<juce::AudioParameterFloat>("SKEWEDPROPYRMS", "Skewed Proportion Y RMS", juce::NormalisableRange<float>{0.1f, 1.0f, 0.1f}, 0.3f));
-
-	//FFT Data Index RMS
-	params.push_back(std::make_unique<juce::AudioParameterFloat>("FFTDATAINDEXRMS", "Fft Data Index RMS", juce::NormalisableRange<float>{0.1f, 1.0f, 0.1f}, 0.5f));
-
-	//Level Offset RMS
-	params.push_back(std::make_unique<juce::AudioParameterFloat>("LVLOFFSETRMS", "Level Offset RMS", juce::NormalisableRange<float>{0.0f, 5.0f, 0.1f}, 1.0f));
 
 	//Lvl Knob Spectrogram
 	params.push_back(std::make_unique<juce::AudioParameterFloat>("LVLKNOBSPECTR", "Level Knob Spectrogram", juce::NormalisableRange<float>{0.00001f, 15.0f, 0.1f}, 4.1f));
