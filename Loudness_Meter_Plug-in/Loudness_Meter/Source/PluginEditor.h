@@ -253,8 +253,8 @@ public:
 			g.setColour(juce::Colours::skyblue);
 			g.strokePath(rightChannelFFTPath, juce::PathStrokeType(1.0f));
 
-			//g.setColour(juce::Colours::orange);
-			//g.drawRoundedRectangle(responseAreaRMS.toFloat(), 4.0f, 1.0f);
+			g.setColour(juce::Colours::orange);
+			g.drawRoundedRectangle(responseAreaRMS.toFloat(), 4.0f, 1.0f);
 		}
 		else
 		{
@@ -282,8 +282,8 @@ public:
 		auto bottomRMS = renderAreaRMS.getHeight();
 		auto widthRMS = renderAreaRMS.getWidth();
 		
-		//RMS Colour
-		auto myColourRMS = juce::Colour(255u, 41u, 41u);//Green
+		//Line Colour
+		auto myColour = juce::Colour(255u, 41u, 41u);//Red
 
 		juce::Array<float> myFreqRMSArray[] =
 		{
@@ -317,7 +317,7 @@ public:
 		};
 
 		for each (auto background in myBackgroundsRMS)
-			RMSGrid(myFreqRMSArray[background.first], gain, background.second, renderAreaRMS, leftRMS, rightRMS, topRMS, bottomRMS, widthRMS, myColourRMS, dbToBeColoredRMS[background.first]);
+			RMSGrid(myFreqRMSArray[background.first], gain, background.second, renderAreaRMS, leftRMS, rightRMS, topRMS, bottomRMS, widthRMS, myColour, dbToBeColoredRMS[background.first]);
 
 		//Spectr area spaces 
 		auto renderAreaSpectr = getAnalysisAreaSpectr();
@@ -326,19 +326,16 @@ public:
 		auto topSpectr = renderAreaSpectr.getY();
 		auto bottomSpectr = renderAreaSpectr.getHeight();
 		auto widthSpectr = renderAreaSpectr.getWidth();
-		
-		//Spectr Colour
-		auto myColourSpectr = juce::Colour(255u, 41u, 41u);
 
 		//Frequencies Array Spectr
 		juce::Array<float> myFreqSpectrArray[] =  
 		{
-			{ 20.f, 5000.f, 10000.f, 15000.f, 20000.f },
-			{ 20.f, 6000.f, 9000.f, 15000.f, 20000.f },
-			{ 20.f, 4000.f, 17000.f, 20000.f },
-			{ 20.f, 300.f, 1000.f, 15000.f, 20000.f },
-			{ 50.f, 1000.f, 10000.f, 20000.f},
-			{ 20.f, 5000.f, 10000.f, 15000.f }
+			{ 20.f, 50.f, 100.f, 200.f, 500.f, 1000.f, 2000.f, 5000.f, 10000.f, 20000.f },
+			{ 20.f, 60.f, 300.f, 400.f, 600.f, 2000.f, 3000.f, 6000.f, 9000.f, 20000.f },
+			{ 20.f, 20000.f },
+			{ 20.f, 50.f, 500.f, 5000.f, 20000.f },
+			{ 20.f, 100.f, 1000.f, 10000.f, 20000.f },
+			{ 20.f, 200.f, 2000.f, 20000.f }
 		};
 
 		myBackgroundsSpectr =
@@ -353,11 +350,11 @@ public:
 
 		juce::Array<float> dbToBeColoredSpectr = 
 		{
-			10000.f, 6000.f, 17000.f, 15000.f, 1000.f, 15000.f
+			500.f, 9000.f, 20000.f, 5000.f, 1000.f, 2000.f
 		};
 
 		for each(auto background in myBackgroundsSpectr)
-			spectrGrid(myFreqSpectrArray[background.first], background.second, renderAreaSpectr, leftSpectr, rightSpectr, topSpectr, bottomSpectr, widthSpectr, myColourSpectr, dbToBeColoredSpectr[background.first]);
+			spectrGrid(myFreqSpectrArray[background.first], background.second, renderAreaSpectr, leftSpectr, rightSpectr, topSpectr, bottomSpectr, widthSpectr, myColour, dbToBeColoredSpectr[background.first]);
 	}
 
 	void RMSGrid(juce::Array<float> freqRMS, juce::Array<float> gain, juce::Image imageRMS, juce::Rectangle<int> renderAreaRMS, int leftRMS, int rightRMS, int topRMS, int bottomRMS, int widthRMS, juce::Colour myColour, float numToBeColored)
@@ -461,16 +458,24 @@ public:
 		const int fontHeight = 10;
 		gSpectr.setFont(fontHeight);
 
+		juce::Array<float> yPos;
 		for(auto fLines : freqSpectr)
 		{
-			auto y = juce::jmap(fLines, 20.0f, 20000.0f, float(bottomSpectr), float(topSpectr));
-			gSpectr.setColour(fLines == numToBeColored ? myColour : juce::Colours::lightgrey);
+			auto normY = juce::mapFromLog10(fLines, 20000.0f, 20.0f);
+			yPos.add(topSpectr + bottomSpectr * normY);
+		}
+
+		for(auto y : yPos)
+		{
+			auto myNumberToBeColored = topSpectr + bottomSpectr * juce::mapFromLog10(numToBeColored, 20000.0f, 20.0f);
+			gSpectr.setColour(y == myNumberToBeColored ? myColour : juce::Colours::lightgrey);
 			gSpectr.drawHorizontalLine(y, leftSpectr, rightSpectr);
 		}
 
-		for (auto f : freqSpectr)
+		for (int i = 0; i < freqSpectr.size(); ++i)
 		{
-			auto y = juce::jmap(f, 20.0f, 20000.0f, float(bottomSpectr), float(topSpectr));
+			auto f = freqSpectr[i];
+			auto y = yPos[i];
 
 			gSpectr.setColour(f == numToBeColored ? myColour : juce::Colours::lightgrey);
 
@@ -495,8 +500,8 @@ public:
 			r.setCentre(r.getCentreX(), y);
 
 			gSpectr.drawFittedText(str, r, juce::Justification::centred, 1);
-
 		}
+
 	}
 
 	void timerCallback() override
