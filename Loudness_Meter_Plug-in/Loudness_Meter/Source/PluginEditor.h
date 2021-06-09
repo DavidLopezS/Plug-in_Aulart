@@ -283,7 +283,12 @@ public:
 		auto widthRMS = renderAreaRMS.getWidth();
 		
 		//Line Colour
-		auto myColour = juce::Colour(255u, 41u, 41u);//Red
+		//auto myColour = juce::Colour(255u, 41u, 41u);//Red
+		juce::Array<juce::Colour> myColour = 
+		{
+			juce::Colour(255u, 41u, 41u), juce::Colour(79u, 252u, 45u), juce::Colour(45u, 121u,252u),
+			juce::Colour(231u, 45u, 252u), juce::Colour(252u, 45u, 45u), juce::Colour(252u, 252u, 45u)
+		};
 
 		juce::Array<float> myFreqRMSArray[] =
 		{
@@ -317,7 +322,7 @@ public:
 		};
 
 		for each (auto background in myBackgroundsRMS)
-			RMSGrid(myFreqRMSArray[background.first], gain, background.second, renderAreaRMS, leftRMS, rightRMS, topRMS, bottomRMS, widthRMS, myColour, dbToBeColoredRMS[background.first]);
+			RMSGrid(myFreqRMSArray[background.first], gain, background.second, renderAreaRMS, leftRMS, rightRMS, topRMS, bottomRMS, widthRMS, myColour[background.first], dbToBeColoredRMS[background.first]);
 
 		//Spectr area spaces 
 		auto renderAreaSpectr = getAnalysisAreaSpectr();
@@ -354,7 +359,7 @@ public:
 		};
 
 		for each(auto background in myBackgroundsSpectr)
-			spectrGrid(myFreqSpectrArray[background.first], background.second, renderAreaSpectr, leftSpectr, rightSpectr, topSpectr, bottomSpectr, widthSpectr, myColour, dbToBeColoredSpectr[background.first]);
+			spectrGrid(myFreqSpectrArray[background.first], background.second, renderAreaSpectr, leftSpectr, rightSpectr, topSpectr, bottomSpectr, widthSpectr, myColour[background.first], dbToBeColoredSpectr[background.first]);
 	}
 
 	void RMSGrid(juce::Array<float> freqRMS, juce::Array<float> gain, juce::Image imageRMS, juce::Rectangle<int> renderAreaRMS, int leftRMS, int rightRMS, int topRMS, int bottomRMS, int widthRMS, juce::Colour myColour, float numToBeColored)
@@ -593,6 +598,7 @@ public:
 		forwardFFT.performFrequencyOnlyForwardTransform(audioPrc.fftData);
 
 		juce::Range<float> maxLevel = juce::FloatVectorOperations::findMinAndMax(audioPrc.fftData, audioPrc.fftSize / 2);
+
 		if (maxLevel.getEnd() == 0.0f)
 			maxLevel.setEnd(lvlKnobSpectr);//0.00001f
 
@@ -600,11 +606,11 @@ public:
 		{
 			const float skewedProportionY = 1.0f - std::exp(std::log(i / (float)imageHeight) * skPropSpectr);//0.2f
 			const int fftDataIndex = juce::jlimit(0, audioPrc.fftSize / 2, (int)(skewedProportionY * audioPrc.fftSize / 2));
+			DBG("Max level value: " + (juce::String)fftDataIndex);
 			const float level = juce::jmap(audioPrc.fftData[fftDataIndex], 0.0f, maxLevel.getEnd(), 0.0f, lvlOffSpectr);//Original targetRangeMax = 3.9f, needs to be tweaked/tested
 
 			spectrogramImage.setPixelAt(rightHandEdge, i, juce::Colour::fromHSL(level, 1.0f, level, 1.0f));//Colour::fromHSV
 		}
-
 	}
 
 	void changeRMSOffset(const float myRMSOffset)
@@ -717,6 +723,8 @@ private:
 	float lvlKnobSpectr = 0.00001f;
 	float skPropSpectr = 0.2f;
 	float lvlOffSpectr = 3.9f;
+
+	float maxValue = 1;
 };
 
 //==============================================================================

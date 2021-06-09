@@ -226,7 +226,7 @@ juce::AudioProcessorValueTreeState::ParameterLayout Loudness_MeterAudioProcessor
 	params.push_back(std::make_unique<juce::AudioParameterChoice>("GRAFTYPE", "Graf Type", juce::StringArray{ "RMS", "Spectrogram" }, 0));
 
 	//Order Switch
-	params.push_back(std::make_unique<juce::AudioParameterChoice>("ORDERSWITCH", "Order Switch", juce::StringArray{ "Order 2048", "Order 4096", "Order 8192" }, 1));
+	params.push_back(std::make_unique<juce::AudioParameterChoice>("ORDERSWITCH", "Order Switch", juce::StringArray{ "Order 2048", "Order 4096", "Order 8192" }, 0));
 
 	//Grid Colour Swap
 	params.push_back(std::make_unique<juce::AudioParameterChoice>("COLOURGRIDSWITCH", "Colour Grid Switch", juce::StringArray{ "Green", "Red", "Blue" }, 0));
@@ -244,7 +244,7 @@ juce::AudioProcessorValueTreeState::ParameterLayout Loudness_MeterAudioProcessor
 	params.push_back(std::make_unique<juce::AudioParameterFloat>("SKEWEDPROPYSPECTR", "Skewed Proportion Y Spectrogram", juce::NormalisableRange<float>{0.1f, 1.0f, 0.1f}, 0.4f));
 
 	//Level Offset Spectrogram
-	params.push_back(std::make_unique<juce::AudioParameterFloat>("LVLOFFSETSPECTR", "Level Offset Spectrogram", juce::NormalisableRange<float>{0.0f, 10.0f, 0.1f}, 3.9f));
+	params.push_back(std::make_unique<juce::AudioParameterFloat>("LVLOFFSETSPECTR", "Level Offset Spectrogram", juce::NormalisableRange<float>{0.0f, 50.0f, 1.f}, 3.9f));
 
 	//RMS Line Offset
 	params.push_back(std::make_unique<juce::AudioParameterFloat>("RMSLINEOFFSET", "RMS Line Offser", juce::NormalisableRange<float>{-200.0f, -1.0f, 1.0f}, -48.0f));
