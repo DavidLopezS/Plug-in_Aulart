@@ -606,7 +606,6 @@ public:
 		{
 			const float skewedProportionY = 1.0f - std::exp(std::log(i / (float)imageHeight) * skPropSpectr);//0.2f
 			const int fftDataIndex = juce::jlimit(0, audioPrc.fftSize / 2, (int)(skewedProportionY * audioPrc.fftSize / 2));
-			DBG("Max level value: " + (juce::String)fftDataIndex);
 			const float level = juce::jmap(audioPrc.fftData[fftDataIndex], 0.0f, maxLevel.getEnd(), 0.0f, lvlOffSpectr);//Original targetRangeMax = 3.9f, needs to be tweaked/tested
 
 			spectrogramImage.setPixelAt(rightHandEdge, i, juce::Colour::fromHSL(level, 1.0f, level, 1.0f));//Colour::fromHSV
