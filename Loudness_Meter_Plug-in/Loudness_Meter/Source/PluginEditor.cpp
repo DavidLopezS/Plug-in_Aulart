@@ -73,15 +73,15 @@ void PathProducer::process(juce::Rectangle<float> fftBounds, double sampleRate)
 		}
 	}
 
-	const auto fftSize = leftChannelFFTDataGenerator.getFFTSize();
-	const auto binWidth = sampleRate / double(fftSize);
+	const auto fftSizeRMS = leftChannelFFTDataGenerator.getFFTSize();
+	const auto binWidthRMS = sampleRate / double(fftSizeRMS);
 
 	while (leftChannelFFTDataGenerator.getNumAvailableFFTDataBlocks() > 0)
 	{
 		std::vector<float> fftDataRMS;
 		if (leftChannelFFTDataGenerator.getFFTData(fftDataRMS))
 		{
-			pathProducer.generatePath(fftDataRMS, fftBounds, fftSize, binWidth, offsetRMS);//-48.0f
+			pathProducer.generatePath(fftDataRMS, fftBounds, fftSizeRMS, binWidthRMS, offsetRMS);//-48.0f
 		}
 	}
 
@@ -112,22 +112,22 @@ void ImageProducer::process(double sampleRate)
 		}
 	}
 
-	const auto fftSize = spectrChannelFFTDataGenerator.getFFTSize();
-	const auto binWidth = sampleRate / double(fftSize);
+	const auto fftSizeSpectr = spectrChannelFFTDataGenerator.getFFTSize();
+	const auto binWidthSpectr = sampleRate / double(fftSizeSpectr);
 
 	while(spectrChannelFFTDataGenerator.getNumAvailableFFTDataBlocks() > 0)
 	{
 		std::vector<float> fftDataSpectr;
 		if(spectrChannelFFTDataGenerator.getFFTData(fftDataSpectr))
 		{
-			imageProducer.generateImage(fftDataSpectr, spectrChannelFFTImage, fftSize, binWidth, 0.0f);
+			imageProducer.generateImage(fftDataSpectr, spectrChannelFFTImage, fftSizeSpectr, binWidthSpectr, 0.0f);
 		}
 	}
 
-	while(imageProducer.getNumImagesAvailable() > 0)
-	{
-		imageProducer.getImage(spectrChannelFFTImage);
-	}
+	//while(imageProducer.getNumImagesAvailable() > 0)
+	//{
+	//	imageProducer.getImage(spectrChannelFFTImage);
+	//}
 }
 
 void Loudness_MeterAudioProcessorEditor::knobAttachment(int knobId)

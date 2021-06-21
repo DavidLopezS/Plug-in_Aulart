@@ -262,18 +262,18 @@ public:
 			mainImage.setPixelAt(rightHandEdge, i, juce::Colour::fromHSL(level, 1.0f, level, 1.0f));//Colour::fromHSV
 		}
 
-		imageFifo.push(mainImage);
+		/*imageFifo.push(mainImage);*/
 	}
 
-	int getNumImagesAvailable() const
-	{
-		return imageFifo.getNumAvailableForReading();
-	}
+	//int getNumImagesAvailable() const
+	//{
+	//	return imageFifo.getNumAvailableForReading();
+	//}
 
-	bool getImage(ImageType& image)
-	{
-		return imageFifo.pull(image);
-	}
+	//bool getImage(ImageType& image)
+	//{
+	//	return imageFifo.pull(image);
+	//}
 
 private:
 	Fifo<ImageType> imageFifo;
@@ -357,7 +357,7 @@ struct SpectrogramAndRMSRep : public juce::Component, private juce::Timer
 public:
 
 	SpectrogramAndRMSRep(Loudness_MeterAudioProcessor& p) : audioPrc(p), 
-															forwardFFT(audioPrc.fftOrder), spectrogramImage(juce::Image::RGB, 512, 512, true),
+															forwardFFT(audioPrc.fftOrder), spectrogramImage(juce::Image::RGB, 1024, 1024, true),
 															leftPathProducer(audioPrc.leftChannelFifo), rightPathProducer(audioPrc.rightChannelFifo),
 															spectrImageProducer(audioPrc.spectrChannelFifo)
 	{
@@ -411,7 +411,7 @@ public:
 		}
 		else
 		{
-			g.drawImage(spectrFFTImage, responseAreaSpectr.toFloat());
+			g.drawImage(spectrFFTImage, responseAreaSpectr.toFloat());//spectrogramImage
 
 			for each(auto background in myBackgroundsSpectr)
 			{
