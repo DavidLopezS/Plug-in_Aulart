@@ -95,6 +95,8 @@ void Loudness_MeterAudioProcessor::prepareToPlay (double sampleRate, int samples
 {
 	leftChannelFifo.prepare(samplesPerBlock);
 	rightChannelFifo.prepare(samplesPerBlock);
+
+	spectrChannelFifo.prepare(samplesPerBlock);
 }
 
 void Loudness_MeterAudioProcessor::releaseResources()
@@ -141,6 +143,8 @@ void Loudness_MeterAudioProcessor::processBlock (juce::AudioBuffer<float>& buffe
 
 	leftChannelFifo.update(buffer);
 	rightChannelFifo.update(buffer);
+
+	spectrChannelFifo.update(buffer);
 
 	if (buffer.getNumChannels() > 0)
 	{
@@ -223,7 +227,7 @@ juce::AudioProcessorValueTreeState::ParameterLayout Loudness_MeterAudioProcessor
 	std::vector<std::unique_ptr<juce::RangedAudioParameter>> params;
 
 	//Representation Switch
-	params.push_back(std::make_unique<juce::AudioParameterChoice>("GRAFTYPE", "Graf Type", juce::StringArray{ "RMS", "Spectrogram" }, 0));
+	params.push_back(std::make_unique<juce::AudioParameterChoice>("GRAFTYPE", "Graf Type", juce::StringArray{ "RMS", "Spectrogram" }, 1));
 
 	//Order Switch
 	params.push_back(std::make_unique<juce::AudioParameterChoice>("ORDERSWITCH", "Order Switch", juce::StringArray{ "Order 2048", "Order 4096", "Order 8192" }, 0));

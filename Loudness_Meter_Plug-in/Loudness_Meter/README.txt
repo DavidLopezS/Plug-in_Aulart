@@ -1,0 +1,2 @@
+In order to perform a correctly drawn spectrogram we need to use the already exsiting struct FFTDataGenerator so the data of the buffers can be extracted correctly.
+Method to extract the data and paint it as an image needs to be analyzed for a further improvement of the spectrogram representation, once this is done a proper callibration must occur.

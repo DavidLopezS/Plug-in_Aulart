@@ -78,16 +78,55 @@ void PathProducer::process(juce::Rectangle<float> fftBounds, double sampleRate)
 
 	while (leftChannelFFTDataGenerator.getNumAvailableFFTDataBlocks() > 0)
 	{
-		std::vector<float> fftData;
-		if (leftChannelFFTDataGenerator.getFFTData(fftData))
+		std::vector<float> fftDataRMS;
+		if (leftChannelFFTDataGenerator.getFFTData(fftDataRMS))
 		{
-			pathProducer.generatePath(fftData, fftBounds, fftSize, binWidth, offsetRMS);//-48.0f
+			pathProducer.generatePath(fftDataRMS, fftBounds, fftSize, binWidth, offsetRMS);//-48.0f
 		}
 	}
 
 	while (pathProducer.getNumPathsAvailable() > 0)
 	{
 		pathProducer.getPath(leftChannelFFTPath);
+	}
+}
+
+void ImageProducer::process(double sampleRate)
+{
+	juce::AudioBuffer<float> tempIncomingBuffer;
+	while(spectrChannelFifo->getNumCompleteBuffersAvailable() > 0)
+	{
+		if(spectrChannelFifo->getAudioBuffer(tempIncomingBuffer))
+		{
+			auto size = tempIncomingBuffer.getNumSamples();
+
+			juce::FloatVectorOperations::copy(monoBuffer.getWritePointer(0, 0),
+				monoBuffer.getReadPointer(0, size),
+				monoBuffer.getNumSamples() - size);
+
+			juce::FloatVectorOperations::copy(monoBuffer.getWritePointer(0, monoBuffer.getNumSamples() - size),
+				tempIncomingBuffer.getReadPointer(0, 0),
+				size);
+
+			spectrChannelFFTDataGenerator.produceFFTDataForRendering(monoBuffer, 0.0f);
+		}
+	}
+
+	const auto fftSize = spectrChannelFFTDataGenerator.getFFTSize();
+	const auto binWidth = sampleRate / double(fftSize);
+
+	while(spectrChannelFFTDataGenerator.getNumAvailableFFTDataBlocks() > 0)
+	{
+		std::vector<float> fftDataSpectr;
+		if(spectrChannelFFTDataGenerator.getFFTData(fftDataSpectr))
+		{
+			imageProducer.generateImage(fftDataSpectr, spectrChannelFFTImage, fftSize, binWidth, 0.0f);
+		}
+	}
+
+	while(imageProducer.getNumImagesAvailable() > 0)
+	{
+		imageProducer.getImage(spectrChannelFFTImage);
 	}
 }
 

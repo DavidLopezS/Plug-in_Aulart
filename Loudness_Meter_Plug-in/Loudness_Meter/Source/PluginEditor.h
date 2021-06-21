@@ -19,7 +19,7 @@ enum FFTOrder
 };
 
 template<typename BlockType>
-struct FFTDataGenerator
+struct FFTDataGeneratorRMS
 {
 	/**
 	 produces the FFT data from an audio buffer.
@@ -96,6 +96,79 @@ private:
 	Fifo<BlockType> fftDataFifo;
 };
 
+template<typename BlockType>
+struct FFTDataGeneratorSpectr
+{
+	/**
+	 produces the FFT data from an audio buffer.
+	 */
+	void produceFFTDataForRendering(const juce::AudioBuffer<float>& audioData, const float negativeInfinity)
+	{
+		const auto fftSize = getFFTSize();
+
+		fftData.assign(fftData.size(), 0);
+		auto* readIndex = audioData.getReadPointer(0);
+		std::copy(readIndex, readIndex + fftSize, fftData.begin());
+
+		// then render our FFT data..
+		forwardFFT->performFrequencyOnlyForwardTransform(fftData.data());  
+
+		int numBins = (int)fftSize / 2;
+
+		//normalize the fft values.
+		for (int i = 0; i < numBins; ++i)
+		{
+			auto v = fftData[i];
+			//            fftData[i] /= (float) numBins;
+			if (!std::isinf(v) && !std::isnan(v))
+			{
+				v /= float(numBins);
+			}
+			else
+			{
+				v = 0.f;
+			}
+			fftData[i] = v;
+		}
+
+		//convert them to decibels
+		for (int i = 0; i < numBins; ++i)
+		{
+			fftData[i] = juce::Decibels::gainToDecibels(fftData[i], negativeInfinity);
+		}
+
+		fftDataFifo.push(fftData);
+	}
+
+	void changeOrder(FFTOrder newOrder)
+	{
+		//when you change order, recreate the window, forwardFFT, fifo, fftData
+		//also reset the fifoIndex
+		//things that need recreating should be created on the heap via std::make_unique<>
+
+		order = newOrder;
+		auto fftSize = getFFTSize();
+
+		forwardFFT = std::make_unique<juce::dsp::FFT>(order);
+		
+		fftData.clear();
+		fftData.resize(fftSize * 2, 0);
+
+		fftDataFifo.prepare(fftData.size());
+	}
+	//==============================================================================
+	int getFFTSize() const { return 1 << order; }
+	int getNumAvailableFFTDataBlocks() const { return fftDataFifo.getNumAvailableForReading(); }
+	//==============================================================================
+	bool getFFTData(BlockType& fftData) { return fftDataFifo.pull(fftData); }
+private:
+	FFTOrder order;
+	BlockType fftData;
+	std::unique_ptr<juce::dsp::FFT> forwardFFT;
+
+	Fifo<BlockType> fftDataFifo;
+};
+
 template<typename PathType>
 struct AnalyzerPathGenerator
 {
@@ -128,7 +201,7 @@ struct AnalyzerPathGenerator
 
 		p.startNewSubPath(0, y);
 
-		const int pathResolution = 2; //you can draw line-to's every 'pathResolution' pixels.
+		const int pathResolution = 1; //you can draw line-to's every 'pathResolution' pixels.
 
 		for (int binNum = 1; binNum < numBins; binNum += pathResolution)
 		{
@@ -157,6 +230,53 @@ struct AnalyzerPathGenerator
 	}
 private:
 	Fifo<PathType> pathFifo;
+};
+
+template<typename ImageType>
+struct AnalyzerImageGenerator
+{
+public:
+
+	void generateImage(const std::vector<float>& renderData, juce::Image mainImage, int fftSize, float binWidth, float negativeInfinity)
+	{
+		auto rightHandEdge = mainImage.getWidth() - 1;
+		auto imageHeight = mainImage.getHeight();
+
+		int numBins = fftSize / 2; 
+
+		ImageType image;
+		mainImage.moveImageSection(0, 0, 1, 0, rightHandEdge, imageHeight);
+
+		juce::Range<float> maxLevel = juce::FloatVectorOperations::findMinAndMax(renderData.data(), numBins);
+
+		if (maxLevel.getEnd() == 0.0f)
+			maxLevel.setEnd(0.0000001f);
+
+		for (int i = 1; i < imageHeight; ++i)
+		{
+			const float skewedProportionY = 1.0f - std::exp(std::log(i / (float)imageHeight) * 0.2f);//0.2f
+			const int fftDataIndex = juce::jlimit((int)negativeInfinity, numBins, (int)(skewedProportionY * numBins));
+
+			const float level = juce::jmap(renderData[fftDataIndex], negativeInfinity, maxLevel.getEnd(), negativeInfinity, 3.9f);//Original targetRangeMax = 3.9f, needs to be tweaked/tested
+
+			mainImage.setPixelAt(rightHandEdge, i, juce::Colour::fromHSL(level, 1.0f, level, 1.0f));//Colour::fromHSV
+		}
+
+		imageFifo.push(mainImage);
+	}
+
+	int getNumImagesAvailable() const
+	{
+		return imageFifo.getNumAvailableForReading();
+	}
+
+	bool getImage(ImageType& image)
+	{
+		return imageFifo.pull(image);
+	}
+
+private:
+	Fifo<ImageType> imageFifo;
 };
 
 struct PathProducer
@@ -197,11 +317,39 @@ private:
 
 	juce::AudioBuffer<float> monoBuffer;
 
-	FFTDataGenerator<std::vector<float>> leftChannelFFTDataGenerator;
+	FFTDataGeneratorRMS<std::vector<float>> leftChannelFFTDataGenerator;
 
 	AnalyzerPathGenerator<juce::Path> pathProducer;
 
 	juce::Path leftChannelFFTPath;
+};
+
+struct ImageProducer
+{
+public:
+
+	ImageProducer(SingleChannelSampleFifo<juce::AudioBuffer<float>>& scsf) : spectrChannelFifo(&scsf), 
+																			 spectrChannelFFTImage(juce::Image::RGB, 512, 512, true)
+	{
+		spectrChannelFFTDataGenerator.changeOrder(FFTOrder::order2048);
+		monoBuffer.setSize(1, spectrChannelFFTDataGenerator.getFFTSize());
+	}
+
+	void process(double sampleRate);
+	juce::Image getImage() { return spectrChannelFFTImage; }
+
+private:
+
+	using BlockType = juce::AudioBuffer<float>;
+	SingleChannelSampleFifo<BlockType>* spectrChannelFifo;
+
+	BlockType monoBuffer;
+
+	FFTDataGeneratorSpectr<std::vector<float>> spectrChannelFFTDataGenerator;
+
+	AnalyzerImageGenerator<juce::Image> imageProducer;
+	
+	juce::Image spectrChannelFFTImage;
 };
 
 struct SpectrogramAndRMSRep : public juce::Component, private juce::Timer
@@ -209,8 +357,9 @@ struct SpectrogramAndRMSRep : public juce::Component, private juce::Timer
 public:
 
 	SpectrogramAndRMSRep(Loudness_MeterAudioProcessor& p) : audioPrc(p), 
-															forwardFFT(audioPrc.fftOrder), spectrogramImage(juce::Image::ARGB, 512, 512, true),
-															leftPathProducer(audioPrc.leftChannelFifo), rightPathProducer(audioPrc.rightChannelFifo)
+															forwardFFT(audioPrc.fftOrder), spectrogramImage(juce::Image::RGB, 512, 512, true),
+															leftPathProducer(audioPrc.leftChannelFifo), rightPathProducer(audioPrc.rightChannelFifo),
+															spectrImageProducer(audioPrc.spectrChannelFifo)
 	{
 		startTimerHz(30);//30
 	}
@@ -231,6 +380,13 @@ public:
 		auto responseAreaSpectr = getAnalysisAreaSpectr();
 
 		g.setOpacity(1.0f);
+		
+		//RMS paths
+		auto leftChannelFFTPath = leftPathProducer.getPath();
+		auto rightChannelFFTPath = rightPathProducer.getPath();
+
+		//Spectr image
+		auto spectrFFTImage = spectrImageProducer.getImage();
 
 		if (isRMS)
 		{
@@ -240,9 +396,6 @@ public:
 				if (rmsGridChoice == backround.first)
 					g.drawImage(backround.second, getLocalBounds().toFloat());
 			}
-
-			auto leftChannelFFTPath = leftPathProducer.getPath();
-			auto rightChannelFFTPath = rightPathProducer.getPath();
 
 			leftChannelFFTPath.applyTransform(juce::AffineTransform().translation(responseAreaRMS.getX(), -10.0f));//-10.0f
 			rightChannelFFTPath.applyTransform(juce::AffineTransform().translation(responseAreaRMS.getX(), -10.0f));//-10.0f
@@ -258,7 +411,7 @@ public:
 		}
 		else
 		{
-			g.drawImage(spectrogramImage, responseAreaSpectr.toFloat());
+			g.drawImage(spectrFFTImage, responseAreaSpectr.toFloat());
 
 			for each(auto background in myBackgroundsSpectr)
 			{
@@ -517,6 +670,8 @@ public:
 		leftPathProducer.process(fftBounds, sampleRate);
 		rightPathProducer.process(fftBounds, sampleRate);
 
+		spectrImageProducer.process(sampleRate);
+
 		repaint();
 
 		if (audioPrc.nextFFTBlockReady)
@@ -715,6 +870,8 @@ private:
 	std::map<int, juce::Image> myBackgroundsRMS;
 
 	PathProducer leftPathProducer, rightPathProducer;
+
+	ImageProducer spectrImageProducer;
 
 	bool isRMS = false;
 	int spectrGridChoice = 0;	

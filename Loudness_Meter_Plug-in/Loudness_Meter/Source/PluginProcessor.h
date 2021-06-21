@@ -192,6 +192,8 @@ public:
 	SingleChannelSampleFifo<BlockType> leftChannelFifo{ Channel::Left };
 	SingleChannelSampleFifo<BlockType> rightChannelFifo{ Channel::Right };
 
+	SingleChannelSampleFifo<BlockType> spectrChannelFifo{ Channel::Left };
+
 	enum
 	{
 		fftOrder = 11,//10
