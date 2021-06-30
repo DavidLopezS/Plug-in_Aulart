@@ -207,6 +207,10 @@ public:
 
 private:
     
+	juce::dsp::FFT fFft;
+	juce::dsp::WindowingFunction<float> fWindow;
+
+	void STFT(const juce::AudioSampleBuffer &, size_t);
 	void pushNextSampleIntoFifo(float) noexcept;
 	juce::AudioProcessorValueTreeState::ParameterLayout createParams();
 	

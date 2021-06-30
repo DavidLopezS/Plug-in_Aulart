@@ -110,6 +110,9 @@ struct FFTDataGeneratorSpectr
 		auto* readIndex = audioData.getReadPointer(0);
 		std::copy(readIndex, readIndex + fftSize, fftData.begin());
 
+		// first apply a windowing function to our data
+		window->multiplyWithWindowingTable(fftData.data(), fftSize);
+
 		// then render our FFT data..
 		forwardFFT->performFrequencyOnlyForwardTransform(fftData.data());  
 
@@ -150,6 +153,7 @@ struct FFTDataGeneratorSpectr
 		auto fftSize = getFFTSize();
 
 		forwardFFT = std::make_unique<juce::dsp::FFT>(order);
+		window = std::make_unique<juce::dsp::WindowingFunction<float>>(fftSize, juce::dsp::WindowingFunction<float>::hann);
 		
 		fftData.clear();
 		fftData.resize(fftSize * 2, 0);
@@ -165,6 +169,7 @@ private:
 	FFTOrder order;
 	BlockType fftData;
 	std::unique_ptr<juce::dsp::FFT> forwardFFT;
+	std::unique_ptr<juce::dsp::WindowingFunction<float>> window;
 
 	Fifo<BlockType> fftDataFifo;
 };
@@ -411,7 +416,7 @@ public:
 		}
 		else
 		{
-			g.drawImage(spectrFFTImage, responseAreaSpectr.toFloat());//spectrogramImage
+			g.drawImage(spectrogramImage, responseAreaSpectr.toFloat());//spectrogramImage
 
 			for each(auto background in myBackgroundsSpectr)
 			{

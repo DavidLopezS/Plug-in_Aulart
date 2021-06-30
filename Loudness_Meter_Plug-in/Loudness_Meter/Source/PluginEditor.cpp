@@ -119,7 +119,7 @@ void ImageProducer::process(double sampleRate)
 	{
 		std::vector<float> fftDataSpectr;
 		if(spectrChannelFFTDataGenerator.getFFTData(fftDataSpectr))
-		{
+		{ 
 			imageProducer.generateImage(fftDataSpectr, spectrChannelFFTImage, fftSizeSpectr, binWidthSpectr, 0.0f);
 		}
 	}

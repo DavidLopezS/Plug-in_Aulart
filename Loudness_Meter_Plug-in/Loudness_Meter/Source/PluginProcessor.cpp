@@ -19,7 +19,8 @@ Loudness_MeterAudioProcessor::Loudness_MeterAudioProcessor()
                       #endif
                        .withOutput ("Output", juce::AudioChannelSet::stereo(), true)
                      #endif
-                       ), apvts(*this, nullptr, "Parameters", createParams())
+                       ), apvts(*this, nullptr, "Parameters", createParams()), fFft(fftSize), 
+						  fWindow(fFft.getSize() + 1, juce::dsp::WindowingFunction<float>::hann, false)
 #endif
 {
 }
@@ -146,11 +147,15 @@ void Loudness_MeterAudioProcessor::processBlock (juce::AudioBuffer<float>& buffe
 
 	spectrChannelFifo.update(buffer);
 
+	//auto hopSize = buffer.getNumSamples() / 2;
+
 	if (buffer.getNumChannels() > 0)
 	{
 		const float* channelData = buffer.getReadPointer(0);
 		for (int sample = 0; sample < buffer.getNumSamples(); ++sample)
 			pushNextSampleIntoFifo(channelData[sample]);
+
+		STFT(buffer, buffer.getNumSamples() / 2);
 	}
 
 	auto &graftOutputType = *apvts.getRawParameterValue("GRAFTYPE");
@@ -188,6 +193,35 @@ void Loudness_MeterAudioProcessor::pushNextSampleIntoFifo(float sample) noexcept
 		fifoIndex = 0;
 	}
 	fifo[fifoIndex++] = sample;
+}
+
+void Loudness_MeterAudioProcessor::STFT(const juce::AudioSampleBuffer & signal, size_t hop)
+{
+	using Spectrum = std::vector<float>;
+
+	const float * data = signal.getReadPointer(0);
+	const size_t dataCount = signal.getNumSamples();
+
+	ptrdiff_t fftSize = fFft.getSize();
+
+	ptrdiff_t numHops = 1 + static_cast<long>((dataCount - fftSize) / hop);
+
+	size_t numRows = 1 + (fftSize / 2);
+
+	std::vector<float> fftBuffer(fftSize * 2);
+
+	while(data > 0)
+	{
+	
+		memcpy(fftBuffer.data(), data, fftSize * sizeof(float));
+
+		fWindow.multiplyWithWindowingTable(fftBuffer.data(), fftSize);	
+		fFft.performFrequencyOnlyForwardTransform(fftBuffer.data());
+
+
+
+		data += hop;
+	}
 }
 
 //==============================================================================
