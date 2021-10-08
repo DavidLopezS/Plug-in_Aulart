@@ -197,31 +197,31 @@ void Loudness_MeterAudioProcessor::pushNextSampleIntoFifo(float sample) noexcept
 
 void Loudness_MeterAudioProcessor::STFT(const juce::AudioSampleBuffer & signal, size_t hop)
 {
-	using Spectrum = std::vector<float>;
+	//using Spectrum = std::vector<float>;
 
-	const float * data = signal.getReadPointer(0);
-	const size_t dataCount = signal.getNumSamples();
+	//const float * data = signal.getReadPointer(0);
+	//const size_t dataCount = signal.getNumSamples();
 
-	ptrdiff_t fftSize = fFft.getSize();
+	//ptrdiff_t fftSize = fFft.getSize();
 
-	ptrdiff_t numHops = 1 + static_cast<long>((dataCount - fftSize) / hop);
+	//ptrdiff_t numHops = 1 + static_cast<long>((dataCount - fftSize) / hop);
 
-	size_t numRows = 1 + (fftSize / 2);
+	//size_t numRows = 1 + (fftSize / 2);
 
-	std::vector<float> fftBuffer(fftSize * 2);
+	//std::vector<float> fftBuffer(fftSize * 2);
 
-	while(data > 0)
-	{
-	
-		memcpy(fftBuffer.data(), data, fftSize * sizeof(float));
+	//while(data > 0)
+	//{
+	//
+	//	memcpy(fftBuffer.data(), data, fftSize * sizeof(float));
 
-		fWindow.multiplyWithWindowingTable(fftBuffer.data(), fftSize);	
-		fFft.performFrequencyOnlyForwardTransform(fftBuffer.data());
+	//	fWindow.multiplyWithWindowingTable(fftBuffer.data(), fftSize);	
+	//	fFft.performFrequencyOnlyForwardTransform(fftBuffer.data());
 
 
 
-		data += hop;
-	}
+	//	data += hop;
+	//}
 }
 
 //==============================================================================
